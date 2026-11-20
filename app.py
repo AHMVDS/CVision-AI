@@ -148,7 +148,7 @@ TEXT = {
 # =========================
 
 KEY_CANDIDATES = ("CVISION_AI_KEY", "AI_SERVICE_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY")
-MODEL_NAME = "gemini-2.5-flash"
+MODEL_NAME = "gemini-3.8-flash"
 
 
 def _parse_secrets_toml_fallback() -> str:
