@@ -38,14 +38,18 @@ if "file_name" not in st.session_state:
     st.session_state.file_name = ""
 
 
+def toggle_language():
+    st.session_state.lang = "en" if st.session_state.lang == "ar" else "ar"
+
+
 # =========================
 # TRANSLATIONS
 # =========================
 
 TEXT = {
     "ar": {
-        "switch_label": "EN",
-        "switch_help": "Switch interface to English",
+        "switch_label": "🌐 EN",
+        "switch_help": "Switch interface to English (LTR)",
         "subtitle": "منصة ذكية لتحليل وتقييم السير الذاتية بمعايير التوظيف الحديثة",
         "badge": "ذكاء اصطناعي • تقييم ATS واحترافي",
         "hero": "طوّر سيرتك الذاتية",
@@ -90,8 +94,8 @@ TEXT = {
         "items_count": "عناصر",
     },
     "en": {
-        "switch_label": "عربي",
-        "switch_help": "تبديل الواجهة إلى اللغة العربية",
+        "switch_label": "🌐 عربي",
+        "switch_help": "تبديل الواجهة إلى اللغة العربية (RTL)",
         "subtitle": "Intelligent resume evaluation & ATS readiness platform",
         "badge": "ARTIFICIAL INTELLIGENCE • ATS & CAREER INSIGHTS",
         "hero": "Make your resume",
@@ -210,10 +214,6 @@ CV CONTENT:
     return json.loads(raw)
 
 
-def toggle_language():
-    st.session_state.lang = "en" if st.session_state.lang == "ar" else "ar"
-
-
 # =========================
 # ACTIVE LANGUAGE & DIRECTION
 # =========================
@@ -226,7 +226,6 @@ direction = "rtl" if ar else "ltr"
 text_align = "right" if ar else "left"
 opposite_align = "left" if ar else "right"
 
-# Auto-refresh existing result into newly selected language when CV text is available
 if (
     st.session_state.result is not None
     and st.session_state.result_lang != lang
@@ -265,7 +264,7 @@ components.html(
 
 
 # =========================
-# PREMIUM BLUE & WHITE SAAS THEME
+# STYLES (WITH REFINED LANGUAGE BUTTON)
 # =========================
 
 st.markdown(
@@ -326,9 +325,9 @@ st.markdown(
         visibility: hidden;
     }}
 
-    /* TOP BAR & LANGUAGE TOGGLE */
+    /* TOP BAR */
     .topbar-card {{
-        background: rgba(255, 255, 255, 0.88);
+        background: rgba(255, 255, 255, 0.90);
         backdrop-filter: blur(12px);
         border: 1px solid var(--border);
         border-radius: 20px;
@@ -376,27 +375,50 @@ st.markdown(
         margin-top: 2px;
     }}
 
-    .st-key-lang_switch_wrap div.stButton > button {{
-        min-height: 38px;
-        height: 38px;
-        width: 100%;
-        border-radius: 12px;
-        background: var(--blue-50);
-        color: var(--blue-700);
-        border: 1px solid var(--blue-200);
-        font-size: 13px;
-        font-weight: 800;
-        padding: 0 14px;
-        box-shadow: none;
-        transition: all 0.2s ease;
+    /* REFINED LANGUAGE BUTTON STYLING */
+    .lang-btn-box {{
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
     }}
 
-    .st-key-lang_switch_wrap div.stButton > button:hover {{
-        background: var(--blue-600);
-        color: #ffffff;
-        border-color: var(--blue-600);
-        transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.22);
+    .lang-btn-box div.stButton {{
+        width: auto;
+    }}
+
+    .lang-btn-box div.stButton > button {{
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        min-height: 38px !important;
+        height: 38px !important;
+        min-width: 84px !important;
+        width: auto !important;
+        padding: 0 16px !important;
+        border-radius: 999px !important;
+        background: linear-gradient(135deg, #ffffff 0%, var(--blue-50) 100%) !important;
+        color: var(--blue-800) !important;
+        border: 1.5px solid var(--blue-200) !important;
+        font-size: 13px !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.2px;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08) !important;
+        transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        white-space: nowrap !important;
+    }}
+
+    .lang-btn-box div.stButton > button:hover {{
+        background: linear-gradient(135deg, var(--blue-600) 0%, var(--blue-500) 100%) !important;
+        color: #ffffff !important;
+        border-color: var(--blue-600) !important;
+        transform: translateY(-1.5px) scale(1.02) !important;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.26) !important;
+    }}
+
+    .lang-btn-box div.stButton > button:active {{
+        transform: translateY(0px) scale(0.98) !important;
+        box-shadow: 0 3px 10px rgba(37, 99, 235, 0.2) !important;
     }}
 
     /* HERO BANNER */
@@ -611,7 +633,7 @@ st.markdown(
     }}
 
     /* PRIMARY ACTION BUTTONS */
-    div.stButton > button {{
+    .action-btn-wrap div.stButton > button {{
         background: linear-gradient(115deg, var(--blue-700) 0%, var(--blue-600) 55%, var(--blue-500) 100%);
         color: #ffffff;
         border: none;
@@ -623,7 +645,7 @@ st.markdown(
         transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
     }}
 
-    div.stButton > button:hover {{
+    .action-btn-wrap div.stButton > button:hover {{
         color: #ffffff;
         transform: translateY(-2px);
         filter: brightness(1.04);
@@ -846,13 +868,12 @@ with top_left:
     )
 
 with top_right:
-    st.markdown('<div class="st-key-lang_switch_wrap">', unsafe_allow_html=True)
+    st.markdown('<div class="lang-btn-box">', unsafe_allow_html=True)
     st.button(
         t["switch_label"],
         key="language_toggle_btn",
         help=t["switch_help"],
         on_click=toggle_language,
-        use_container_width=True,
     )
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -950,6 +971,7 @@ if uploaded_file is not None:
         unsafe_allow_html=True,
     )
 
+    st.markdown('<div class="action-btn-wrap">', unsafe_allow_html=True)
     if st.button(t["analyze"], key="run_analysis_btn", use_container_width=True):
         try:
             with st.spinner(t["loading"]):
@@ -967,6 +989,7 @@ if uploaded_file is not None:
             st.rerun()
         except Exception:
             st.error(t["error_api"])
+    st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1085,12 +1108,14 @@ if st.session_state.result is not None:
 
     st.markdown('<div style="height:14px;"></div>', unsafe_allow_html=True)
 
+    st.markdown('<div class="action-btn-wrap">', unsafe_allow_html=True)
     if st.button(t["new"], key="reset_analysis_btn", use_container_width=True):
         st.session_state.result = None
         st.session_state.result_lang = None
         st.session_state.cv_text = ""
         st.session_state.file_name = ""
         st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 # =========================
