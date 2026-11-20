@@ -3,6 +3,7 @@ import streamlit as st
 import json
 import os
 import re
+import html
 from io import BytesIO
 from pypdf import PdfReader
 from docx import Document
@@ -12,7 +13,7 @@ from google.genai import types
 st.set_page_config(
     page_title="CVision AI",
     page_icon="📄",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state="collapsed"
 )
 
@@ -35,210 +36,588 @@ if "cv_text" not in st.session_state:
 
 TEXT = {
     "ar": {
-        "subtitle": "نظام السيرة الذاتية الذكي للأعمال",
-        "badge": "تقييم ذكي وفوري للسيرة الذاتية",
-        "hero": "قيّم السيرة الذاتية بوضوح وسرعة",
-        "description": "ارفع ملف السيرة الذاتية لتحليل محتواه وتقييم المهارات والخبرات وعرض نقاط القوة واقتراحات التحسين.",
-        "start": "ابدأ الآن",
-        "upload": "رفع السيرة الذاتية",
-        "upload_hint": "الصيغ المدعومة PDF أو DOCX",
-        "drop": "اختر ملف السيرة الذاتية",
-        "size": "الحد الأقصى 10 ميجابايت",
-        "analyze": "تحليل السيرة الذاتية",
-        "loading": "جاري تحليل السيرة الذاتية...",
-        "score": "نسبة التقييم والجاهزية",
-        "summary": "التقييم العام",
+        "subtitle": "منصة ذكية لتحليل وتقييم السير الذاتية",
+        "badge": "ذكاء اصطناعي • تحليل احترافي",
+        "hero": "سيرتك الذاتية،",
+        "hero_highlight": "بشكل أقوى.",
+        "description": "اكتشف نقاط قوتك، قيّم مهاراتك، واعرف كيف تطوّر سيرتك الذاتية لتكون أكثر احترافية وجاهزية لسوق العمل.",
+        "start": "ابدأ تحليل سيرتك الذاتية",
+        "upload": "حلّل سيرتك الذاتية",
+        "upload_hint": "ارفع ملفك ودعنا نساعدك على اكتشاف إمكانياته.",
+        "drop": "اسحب ملفك هنا أو اضغط للاختيار",
+        "formats": "PDF أو DOCX • حتى 10 ميجابايت",
+        "analyze": "ابدأ التحليل الذكي",
+        "loading": "نحلل سيرتك الذاتية الآن...",
+        "loading_hint": "نراجع المهارات والخبرات وجودة المحتوى",
+        "score": "درجة جاهزية السيرة الذاتية",
+        "summary": "نظرة عامة",
         "skills": "المهارات المكتشفة",
-        "missing": "المهارات والعناصر الناقصة",
+        "missing": "عناصر تحتاج إلى تحسين",
         "strengths": "نقاط القوة",
-        "suggestions": "اقتراحات للتحسين",
-        "new": "تحليل سيرة ذاتية أخرى",
+        "suggestions": "توصياتنا لك",
+        "new": "تحليل سيرة ذاتية جديدة",
         "error_file": "يرجى اختيار ملف PDF أو DOCX.",
         "error_size": "حجم الملف أكبر من 10 ميجابايت.",
-        "error_text": "تعذر استخراج النص من الملف.",
+        "error_text": "تعذر استخراج النص من الملف. تأكد أن الملف يحتوي على نص قابل للقراءة.",
         "error_api": "تعذر إتمام التحليل. تأكد من إعدادات الخدمة وحاول مرة أخرى.",
-        "footer": "CVision AI — نظام السيرة الذاتية الذكي",
-        "f1": "رفع السيرة الذاتية",
+        "footer": "CVision AI",
+        "footer_desc": "خطوة أذكى نحو فرصتك المهنية القادمة.",
+        "f1": "ارفع ملفك",
+        "f1d": "ارفع سيرتك الذاتية بسهولة.",
         "f2": "تحليل ذكي",
-        "f3": "نتائج واضحة وعملية",
-        "f1d": "دعم ملفات PDF وDOCX واستخراج النص.",
-        "f2d": "تحليل الخبرات والمهارات والمحتوى.",
-        "f3d": "تقييم شامل وتوصيات للتحسين."
+        "f2d": "اكتشف مهاراتك وخبراتك.",
+        "f3": "طوّر سيرتك",
+        "f3d": "احصل على توصيات عملية.",
+        "step": "ثلاث خطوات بسيطة",
+        "result_label": "نتيجة التحليل",
+        "excellent": "ممتاز",
+        "good": "جيد جدًا",
+        "average": "يحتاج إلى تطوير",
+        "weak": "يحتاج إلى تحسين",
+        "empty": "لا توجد عناصر لعرضها حاليًا.",
+        "file_ready": "ملفك جاهز للتحليل",
+        "secure": "تحليل سريع • تجربة سهلة • نتائج واضحة",
+        "home": "الرئيسية",
+        "analysis_note": "هذا التقييم استرشادي لجودة السيرة الذاتية، وليس ضمانًا للقبول الوظيفي."
     },
     "en": {
-        "subtitle": "Smart Business CV System",
-        "badge": "Smart and Instant CV Evaluation",
-        "hero": "Evaluate Resumes Clearly & Fast",
-        "description": "Upload your CV to analyze its content, evaluate skills and experience, and receive strengths and improvement suggestions.",
-        "start": "Get Started",
-        "upload": "Upload Your CV",
-        "upload_hint": "Supported formats: PDF or DOCX",
-        "drop": "Choose your CV file",
-        "size": "Maximum file size: 10 MB",
-        "analyze": "Analyze CV",
+        "subtitle": "Your intelligent CV analysis platform",
+        "badge": "ARTIFICIAL INTELLIGENCE • PROFESSIONAL ANALYSIS",
+        "hero": "Make your CV",
+        "hero_highlight": "stand out.",
+        "description": "Discover your strengths, evaluate your skills, and learn how to improve your resume to become more professional and job-ready.",
+        "start": "Analyze Your CV",
+        "upload": "Analyze Your Resume",
+        "upload_hint": "Upload your file and let us uncover its potential.",
+        "drop": "Drag your file here or click to browse",
+        "formats": "PDF or DOCX • Up to 10 MB",
+        "analyze": "Start Smart Analysis",
         "loading": "Analyzing your CV...",
+        "loading_hint": "Reviewing your skills, experience and content",
         "score": "CV Readiness Score",
-        "summary": "Overall Evaluation",
+        "summary": "Overview",
         "skills": "Identified Skills",
-        "missing": "Missing Skills & Elements",
-        "strengths": "Candidate Strengths",
-        "suggestions": "Improvement Suggestions",
+        "missing": "Areas to Improve",
+        "strengths": "Your Strengths",
+        "suggestions": "Our Recommendations",
         "new": "Analyze Another CV",
         "error_file": "Please upload a PDF or DOCX file.",
         "error_size": "File size exceeds 10 MB.",
-        "error_text": "Could not extract readable text from the file.",
+        "error_text": "Could not extract readable text from this file.",
         "error_api": "Analysis failed. Please check the service configuration and try again.",
-        "footer": "CVision AI — Smart Business CV System",
-        "f1": "Upload CV",
-        "f2": "Smart Analysis",
-        "f3": "Clear Results",
-        "f1d": "PDF and DOCX support with text extraction.",
-        "f2d": "Analyze skills, experience and content.",
-        "f3d": "Overall evaluation and recommendations."
+        "footer": "CVision AI",
+        "footer_desc": "A smarter step towards your next career opportunity.",
+        "f1": "Upload your CV",
+        "f1d": "Upload your resume easily.",
+        "f2": "Smart analysis",
+        "f2d": "Discover your skills and experience.",
+        "f3": "Improve your CV",
+        "f3d": "Get practical recommendations.",
+        "step": "THREE SIMPLE STEPS",
+        "result_label": "ANALYSIS RESULT",
+        "excellent": "Excellent",
+        "good": "Very Good",
+        "average": "Needs Development",
+        "weak": "Needs Improvement",
+        "empty": "No items to display.",
+        "file_ready": "Your file is ready for analysis",
+        "secure": "Fast analysis • Easy experience • Clear results",
+        "home": "Home",
+        "analysis_note": "This score is an indicative CV quality assessment, not a guarantee of employment."
     }
 }
 
 t = TEXT[st.session_state.lang]
 ar = st.session_state.lang == "ar"
+direction = "rtl" if ar else "ltr"
+align = "right" if ar else "left"
+font = "Cairo" if ar else "Inter"
 
 # =========================
-# DESIGN
+# DESIGN SYSTEM
 # =========================
 
 st.markdown(f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root {{
+    --primary: #2563eb;
+    --primary-dark: #1745b8;
+    --blue-light: #eff6ff;
+    --text: #10213f;
+    --muted: #718096;
+    --border: #e6edf7;
+}}
 
 .stApp {{
-    background: #f8fafc;
-    color: #0f172a;
+    background:
+        radial-gradient(ellipse at 10% 5%, rgba(59,130,246,.10), transparent 30%),
+        radial-gradient(ellipse at 90% 25%, rgba(96,165,250,.10), transparent 28%),
+        #f7f9fd;
+    color: var(--text);
+    font-family: '{font}', sans-serif;
 }}
 
 html, body, [class*="css"] {{
-    font-family: {'Cairo' if ar else 'Inter'}, sans-serif;
+    font-family: '{font}', sans-serif;
 }}
 
 [data-testid="stHeader"] {{
     background: transparent;
 }}
 
+[data-testid="stToolbar"] {{
+    right: 1rem;
+}}
+
 .block-container {{
-    max-width: 1000px;
-    padding-top: 2rem;
-    padding-bottom: 3rem;
+    max-width: 1160px;
+    padding-top: 1.2rem;
+    padding-bottom: 2rem;
+}}
+
+h1, h2, h3, p {{
+    font-family: '{font}', sans-serif;
 }}
 
 h1, h2, h3 {{
-    color: #0f172a;
+    color: var(--text);
+}}
+
+#MainMenu, footer {{
+    visibility: hidden;
+}}
+
+header {{
+    visibility: visible;
+}}
+
+[data-testid="stSelectbox"] {{
+    max-width: 145px;
+    margin-inline-start: auto;
+}}
+
+[data-testid="stSelectbox"] > div > div {{
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: white;
+}}
+
+.brand {{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 10px 0 0;
+}}
+
+.brand-icon {{
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg,#2563eb,#60a5fa);
+    color: white;
+    border-radius: 14px;
+    font-size: 21px;
+    box-shadow: 0 8px 20px rgba(37,99,235,.25);
+}}
+
+.brand-name {{
+    font-size: 27px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    color: #173b79;
+}}
+
+.brand-name span {{
+    color: #3b82f6;
+}}
+
+.brand-sub {{
+    color: #8493aa;
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    text-align: center;
+    margin-top: 2px;
 }}
 
 .hero {{
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 25px;
-    padding: 45px 30px;
-    text-align: center;
-    box-shadow: 0 10px 30px -10px rgba(37,99,235,.12);
-    margin: 15px 0 25px;
-}}
-
-.logo {{
-    color: #2563eb;
-    font-size: 34px;
-    font-weight: 800;
-    letter-spacing: -1px;
-}}
-
-.badge {{
-    display: inline-block;
-    background: #eff6ff;
-    color: #1d4ed8;
-    border: 1px solid #dbeafe;
-    padding: 7px 15px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(120deg,#102d61 0%,#174b9d 55%,#347ce5 100%);
     border-radius: 30px;
-    font-size: 13px;
-    margin: 15px 0;
+    padding: 65px 35px;
+    margin: 30px 0 28px;
+    text-align: center;
+    box-shadow: 0 22px 55px rgba(23,69,184,.18);
+}}
+
+.hero:before {{
+    content: "";
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.13);
+    top: -160px;
+    { "left" if ar else "right" }: -60px;
+}}
+
+.hero:after {{
+    content: "";
+    position: absolute;
+    width: 210px;
+    height: 210px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.055);
+    bottom: -120px;
+    { "right" if ar else "left" }: 5%;
+}}
+
+.hero-content {{
+    position: relative;
+    z-index: 2;
+}}
+
+.hero-badge {{
+    display: inline-block;
+    color: #dbeafe;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.20);
+    border-radius: 50px;
+    padding: 8px 17px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    margin-bottom: 20px;
+}}
+
+.hero h1 {{
+    color: white;
+    font-size: clamp(32px,5vw,53px);
+    line-height: 1.35;
+    font-weight: 900;
+    margin: 0 0 14px;
+}}
+
+.hero h1 span {{
+    color: #93c5fd;
 }}
 
 .hero p {{
-    color: #64748b;
-    line-height: 1.9;
-    font-size: 16px;
+    color: #dbeafe;
+    font-size: 15px;
+    line-height: 2;
+    max-width: 680px;
+    margin: 0 auto;
 }}
 
-.feature {{
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 15px;
-    padding: 17px;
-    text-align: {'right' if ar else 'left'};
-    margin-top: 15px;
+.hero-note {{
+    color: #dbeafe;
+    font-size: 11px;
+    margin-top: 25px;
+    opacity: .85;
 }}
 
-.feature strong {{
-    color: #2563eb;
+.section-kicker {{
+    color: #3b82f6;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+    text-align: center;
+    margin-top: 34px;
+}}
+
+.section-heading {{
+    font-size: 25px;
+    font-weight: 900;
+    color: #142b50;
+    text-align: center;
+    margin: 5px 0 22px;
+}}
+
+.feature-card {{
+    background: rgba(255,255,255,.88);
+    border: 1px solid #e7edf7;
+    border-radius: 19px;
+    padding: 22px 17px;
+    min-height: 145px;
+    box-shadow: 0 7px 22px rgba(31,65,114,.035);
+    transition: all .25s ease;
+    text-align: {align};
+}}
+
+.feature-card:hover {{
+    transform: translateY(-5px);
+    border-color: #bfdbfe;
+    box-shadow: 0 15px 30px rgba(37,99,235,.09);
+}}
+
+.feature-icon {{
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eff6ff;
+    font-size: 20px;
+    margin-bottom: 13px;
+}}
+
+.feature-card strong {{
     display: block;
+    color: #173b79;
+    font-size: 15px;
+    margin-bottom: 6px;
+}}
+
+.feature-card span {{
+    color: #8190a8;
+    font-size: 12px;
+    line-height: 1.8;
+}}
+
+.upload-panel {{
+    background: rgba(255,255,255,.95);
+    border: 1px solid #e3ebf7;
+    border-radius: 25px;
+    padding: 30px;
+    margin-top: 35px;
+    box-shadow: 0 15px 40px rgba(31,65,114,.06);
+}}
+
+.panel-heading {{
+    color: #15366c;
+    font-size: 22px;
+    font-weight: 900;
+    text-align: {align};
     margin-bottom: 5px;
 }}
 
-.feature span {{
-    color: #64748b;
-    font-size: 12px;
+.panel-description {{
+    color: #8290a7;
+    font-size: 13px;
+    text-align: {align};
+    margin-bottom: 20px;
 }}
 
-.panel {{
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 20px;
-    padding: 25px;
-    margin-top: 20px;
+[data-testid="stFileUploader"] {{
+    border: 2px dashed #bfdbfe;
+    border-radius: 19px;
+    background: #f7faff;
+    padding: 14px;
+    transition: all .2s ease;
 }}
 
-.score {{
+[data-testid="stFileUploader"]:hover {{
+    border-color: #3b82f6;
     background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    border-radius: 18px;
-    padding: 20px;
+}}
+
+[data-testid="stFileUploader"] section {{
+    border: none;
+}}
+
+[data-testid="stFileUploader"] button {{
+    border-radius: 10px;
+}}
+
+div.stButton > button {{
+    background: linear-gradient(110deg,#2563eb,#3478e5);
+    color: white;
+    border: none;
+    border-radius: 13px;
+    min-height: 49px;
+    font-family: '{font}', sans-serif;
+    font-weight: 800;
+    box-shadow: 0 8px 20px rgba(37,99,235,.18);
+    transition: all .2s ease;
+}}
+
+div.stButton > button:hover {{
+    background: linear-gradient(110deg,#1745b8,#2563eb);
+    color: white;
+    border: none;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(37,99,235,.25);
+}}
+
+div.stButton > button:focus {{
+    color: white;
+}}
+
+[data-testid="stProgress"] > div > div {{
+    background: linear-gradient(90deg,#2563eb,#60a5fa);
+    border-radius: 20px;
+}}
+
+.result-header {{
+    background: linear-gradient(120deg,#102d61,#2563eb);
+    border-radius: 23px;
+    padding: 28px;
+    color: white;
+    margin-top: 30px;
     text-align: center;
 }}
 
-.score-number {{
+.result-header small {{
+    color: #bfdbfe;
+    letter-spacing: 1.5px;
+    font-weight: 800;
+}}
+
+.result-header h2 {{
+    color: white;
+    font-size: 27px;
+    font-weight: 900;
+    margin: 8px 0 0;
+}}
+
+.score-card {{
+    background: white;
+    border: 1px solid #e5edf8;
+    border-radius: 22px;
+    padding: 25px 15px;
+    text-align: center;
+    box-shadow: 0 12px 30px rgba(31,65,114,.06);
+    height: 100%;
+}}
+
+.score-circle {{
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin: 15px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: conic-gradient(#3b82f6 { "{score}" }%, #e8effa 0);
+    position: relative;
+}}
+
+.score-circle:before {{
+    content: "";
+    position: absolute;
+    width: 124px;
+    height: 124px;
+    background: white;
+    border-radius: 50%;
+}}
+
+.score-value {{
+    position: relative;
+    z-index: 1;
+    color: #1745a0;
+    font-size: 37px;
+    font-weight: 900;
+}}
+
+.score-label {{
+    color: #74849d;
+    font-size: 13px;
+    font-weight: 700;
+}}
+
+.score-status {{
+    display: inline-block;
+    background: #eff6ff;
     color: #2563eb;
-    font-size: 45px;
+    border-radius: 30px;
+    padding: 7px 17px;
+    font-size: 12px;
     font-weight: 800;
 }}
 
 .result-box {{
     background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 20px;
+    border: 1px solid #e7edf7;
+    border-radius: 17px;
+    padding: 22px;
     margin: 12px 0;
+    color: #43536d;
+    line-height: 2;
+    font-size: 14px;
+    box-shadow: 0 5px 20px rgba(31,65,114,.035);
+    text-align: {align};
+    overflow-wrap: anywhere;
 }}
 
-div.stButton > button {{
-    background: #2563eb;
-    color: white;
-    border-radius: 11px;
-    border: none;
-    font-weight: 700;
-    min-height: 45px;
+.result-card {{
+    background: white;
+    border: 1px solid #e7edf7;
+    border-radius: 18px;
+    padding: 21px;
+    min-height: 160px;
+    margin-bottom: 14px;
+    box-shadow: 0 5px 20px rgba(31,65,114,.035);
 }}
 
-div.stButton > button:hover {{
-    background: #1d4ed8;
-    color: white;
+.result-card-title {{
+    color: #183c78;
+    font-weight: 900;
+    font-size: 15px;
+    margin-bottom: 13px;
+    text-align: {align};
 }}
 
-[data-testid="stFileUploader"] {{
-    background: #f8fafc;
-    border-radius: 15px;
+.result-item {{
+    color: #5b6b82;
+    font-size: 13px;
+    line-height: 1.9;
+    padding: 7px 0;
+    border-bottom: 1px solid #f0f3f8;
+    text-align: {align};
+    overflow-wrap: anywhere;
 }}
 
-footer {{
-    visibility: hidden;
+.result-item:last-child {{
+    border-bottom: none;
 }}
 
+.footer {{
+    border-top: 1px solid #e8eef7;
+    padding-top: 22px;
+    margin-top: 50px;
+    text-align: center;
+    color: #8795aa;
+    font-size: 12px;
+}}
+
+.footer strong {{
+    color: #2563eb;
+    font-size: 15px;
+}}
+
+.analysis-note {{
+    color: #8492a8;
+    font-size: 11px;
+    text-align: center;
+    margin-top: 15px;
+}}
+
+@media (max-width: 700px) {{
+    .block-container {{
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }}
+    .hero {{
+        padding: 45px 18px;
+        border-radius: 22px;
+    }}
+    .hero h1 {{
+        font-size: 34px;
+    }}
+    .upload-panel {{
+        padding: 19px;
+    }}
+    .brand-name {{
+        font-size: 24px;
+    }}
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -246,9 +625,9 @@ footer {{
 # LANGUAGE SWITCH
 # =========================
 
-col1, col2 = st.columns([3, 1])
+top1, top2 = st.columns([5, 1])
 
-with col2:
+with top2:
     language = st.selectbox(
         "Language",
         ["العربية", "English"],
@@ -263,41 +642,62 @@ with col2:
         st.rerun()
 
 # =========================
-# HEADER
+# BRAND HEADER
 # =========================
 
 st.markdown("""
-<div style="text-align:center;margin:15px 0;">
-    <div class="logo">CVision AI</div>
+<div class="brand">
+    <div class="brand-icon">✦</div>
+    <div class="brand-name">CVision <span>AI</span></div>
 </div>
 """, unsafe_allow_html=True)
 
-st.caption(t["subtitle"])
+st.markdown(
+    f'<div class="brand-sub">{t["subtitle"]}</div>',
+    unsafe_allow_html=True
+)
 
 # =========================
-# HOME
+# HERO
 # =========================
 
 st.markdown(f"""
 <div class="hero">
-    <div class="badge">CVision AI • {t['badge']}</div>
-    <h1>{t['hero']}</h1>
-    <p>{t['description']}</p>
+    <div class="hero-content">
+        <div class="hero-badge">✦ {t["badge"]}</div>
+        <h1>{t["hero"]}<br><span>{t["hero_highlight"]}</span></h1>
+        <p>{t["description"]}</p>
+        <div class="hero-note">✧ {t["secure"]}</div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
-f1, f2, f3 = st.columns(3)
+# =========================
+# FEATURES
+# =========================
 
-for col, title, desc in [
-    (f1, t["f1"], t["f1d"]),
-    (f2, t["f2"], t["f2d"]),
-    (f3, t["f3"], t["f3d"])
-]:
+st.markdown(
+    f'<div class="section-kicker">{t["step"]}</div>',
+    unsafe_allow_html=True
+)
+
+features = [
+    ("📄", "f1", "f1d"),
+    ("✦", "f2", "f2d"),
+    ("🚀", "f3", "f3d")
+]
+
+cols = st.columns(3)
+
+for col, (icon, title_key, desc_key) in zip(cols, features):
     with col:
-        st.markdown(
-            f'<div class="feature"><strong>{title}</strong><span>{desc}</span></div>',
-            unsafe_allow_html=True
-        )
+        st.markdown(f"""
+        <div class="feature-card">
+            <div class="feature-icon">{icon}</div>
+            <strong>{t[title_key]}</strong>
+            <span>{t[desc_key]}</span>
+        </div>
+        """, unsafe_allow_html=True)
 
 # =========================
 # FILE EXTRACTION
@@ -385,23 +785,31 @@ CV CONTENT:
 
         return json.loads(raw)
 
-    except Exception:
-        raise RuntimeError("Analysis service unavailable")
+    except Exception as e:
+        raise RuntimeError("Analysis service unavailable") from e
 
 
 # =========================
 # UPLOAD SECTION
 # =========================
 
-st.markdown('<div class="panel">', unsafe_allow_html=True)
-
-st.subheader("📄 " + t["upload"])
-st.caption(t["upload_hint"])
+st.markdown(f"""
+<div class="upload-panel">
+    <div class="panel-heading">📄 {t["upload"]}</div>
+    <div class="panel-description">{t["upload_hint"]}</div>
+</div>
+""", unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader(
     t["drop"],
     type=["pdf", "docx"],
-    key="cv_upload"
+    key="cv_upload",
+    help=t["formats"]
+)
+
+st.markdown(
+    f'<div style="text-align:center;color:#8492a8;font-size:11px;margin-top:-5px;">{t["formats"]}</div>',
+    unsafe_allow_html=True
 )
 
 if uploaded_file:
@@ -410,7 +818,7 @@ if uploaded_file:
         st.error(t["error_size"])
         st.stop()
 
-    st.success(uploaded_file.name)
+    st.success(f"✓ {t['file_ready']}: {uploaded_file.name}")
 
     if st.button(t["analyze"], use_container_width=True):
 
@@ -431,8 +839,6 @@ if uploaded_file:
         except Exception:
             st.error(t["error_api"])
 
-st.markdown('</div>', unsafe_allow_html=True)
-
 # =========================
 # RESULTS
 # =========================
@@ -441,29 +847,55 @@ if st.session_state.result:
 
     result = st.session_state.result
 
-    st.divider()
-    st.subheader("📊 " + t["summary"])
-
     score = max(
         0,
         min(100, int(result.get("compatibilityScore", 0)))
     )
 
+    if score >= 85:
+        status = t["excellent"]
+    elif score >= 70:
+        status = t["good"]
+    elif score >= 50:
+        status = t["average"]
+    else:
+        status = t["weak"]
+
     st.markdown(f"""
-    <div class="score">
-        <div style="color:#1e40af;font-weight:700;">
-            {t['score']}
-        </div>
-        <div class="score-number">{score}%</div>
+    <div class="result-header">
+        <small>{t["result_label"]}</small>
+        <h2>📊 {t["summary"]}</h2>
     </div>
     """, unsafe_allow_html=True)
 
-    st.progress(score / 100)
+    st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
 
-    st.markdown(
-        f'<div class="result-box">{result.get("summary", "")}</div>',
-        unsafe_allow_html=True
-    )
+    score_col, summary_col = st.columns([1, 1.5])
+
+    with score_col:
+        st.markdown(f"""
+        <div class="score-card">
+            <div class="score-label">{t["score"]}</div>
+            <div class="score-circle" style="background:conic-gradient(#3b82f6 {score}%,#e8effa 0);">
+                <div class="score-value">{score}%</div>
+            </div>
+            <div class="score-status">{status}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with summary_col:
+        safe_summary = html.escape(str(result.get("summary", "")))
+
+        st.markdown(f"""
+        <div class="result-card" style="height:100%;">
+            <div class="result-card-title">✦ {t["summary"]}</div>
+            <div style="color:#5b6b82;font-size:14px;line-height:2;">
+                {safe_summary}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
     sections = [
         ("💡", "skills", "matchingSkills"),
@@ -472,19 +904,39 @@ if st.session_state.result:
         ("🚀", "suggestions", "suggestions")
     ]
 
-    for icon, label, key in sections:
+    result_cols = st.columns(2)
 
-        st.markdown(f"### {icon} {t[label]}")
+    for index, (icon, label, key) in enumerate(sections):
 
-        items = result.get(key, [])
+        with result_cols[index % 2]:
 
-        if isinstance(items, list) and items:
+            items = result.get(key, [])
+
+            if not isinstance(items, list):
+                items = []
+
+            content = ""
+
             for item in items:
-                st.markdown(f"- {item}")
-        else:
-            st.caption("—")
+                safe_item = html.escape(str(item))
+                content += f'<div class="result-item">• {safe_item}</div>'
 
-    st.divider()
+            if not content:
+                content = f'<div class="result-item">{t["empty"]}</div>'
+
+            st.markdown(f"""
+            <div class="result-card">
+                <div class="result-card-title">{icon} {t[label]}</div>
+                {content}
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown(
+        f'<div class="analysis-note">{t["analysis_note"]}</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
 
     if st.button(t["new"], use_container_width=True):
         st.session_state.result = None
@@ -495,10 +947,10 @@ if st.session_state.result:
 # FOOTER
 # =========================
 
-st.markdown("---")
-
-st.markdown(
-    f'<div style="text-align:center;color:#64748b;font-size:12px;">{t["footer"]}</div>',
-    unsafe_allow_html=True
-)
-
+st.markdown(f"""
+<div class="footer">
+    <strong>CVision AI</strong>
+    <div style="margin-top:6px;">{t["footer_desc"]}</div>
+    <div style="margin-top:12px;font-size:10px;">© 2026 CVision AI. All rights reserved.</div>
+</div>
+""", unsafe_allow_html=True)
