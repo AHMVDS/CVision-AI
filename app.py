@@ -156,7 +156,7 @@ MODEL_CANDIDATES = ("gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash")
 
 
 class CVEvaluationSchema(BaseModel):
-    """Structured schema for CV evaluation output from Gemini."""
+    """Structured schema for CV evaluation output."""
 
     compatibilityScore: int = Field(
         ...,
