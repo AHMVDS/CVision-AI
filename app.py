@@ -72,7 +72,7 @@ TEXT = {
         "new": "تحليل سيرة ذاتية أخرى",
         "error_size": "حجم الملف يتجاوز الحد المسموح (10 ميجابايت). يرجى اختيار ملف أصغر.",
         "error_text": "تعذر استخراج نص واضح من الملف. تأكد أن الملف يحتوي على نص قابل للقراءة وليس صورًا ممسوحة فقط.",
-        "error_api": "تعذر إتمام التحليل حاليًا. تحقق من إعدادات GEMINI_API_KEY في الخلفية وحاول مجددًا.",
+        "error_api": "تعذر إتمام التحليل حاليًا. يرجى المحاولة مرة أخرى بعد قليل.",
         "footer": "خطوة أذكى وأكثر احترافية نحو فرصتك المهنية القادمة.",
         "f1": "1. رفع الملف بسهولة",
         "f1d": "ارفع ملف PDF أو DOCX خلال ثوانٍ دون خطوات معقدة.",
@@ -118,7 +118,7 @@ TEXT = {
         "new": "Analyze Another Resume",
         "error_size": "File size exceeds the 10 MB limit. Please upload a smaller file.",
         "error_text": "Could not extract readable text from this file. Make sure it contains selectable text rather than scanned images only.",
-        "error_api": "Unable to complete analysis right now. Please check the backend GEMINI_API_KEY configuration and try again.",
+        "error_api": "Unable to complete the analysis right now. Please try again shortly.",
         "footer": "A smarter, sharper step toward your next career milestone.",
         "f1": "1. Effortless Upload",
         "f1d": "Upload your PDF or DOCX resume in seconds with zero friction.",
@@ -144,14 +144,14 @@ TEXT = {
 
 
 # =========================
-# BACKEND CONFIG, EXTRACTION & AI ANALYSIS
+# BACKEND CONFIG, EXTRACTION & ENGINE
 # =========================
 
-KEY_CANDIDATES = ("GEMINI_API_KEY", "gemini_api_key", "GOOGLE_API_KEY", "google_api_key")
+KEY_CANDIDATES = ("CVISION_AI_KEY", "AI_SERVICE_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY")
+MODEL_NAME = "gemini-2.5-flash"
 
 
 def _parse_secrets_toml_fallback() -> str:
-    """Fallback reader if working directory differs from app file directory."""
     candidate_paths = [
         Path.cwd() / ".streamlit" / "secrets.toml",
         Path(__file__).resolve().parent / ".streamlit" / "secrets.toml",
@@ -174,8 +174,7 @@ def _parse_secrets_toml_fallback() -> str:
     return ""
 
 
-def get_gemini_api_key() -> str:
-    # 1. Streamlit secrets
+def get_service_key() -> str:
     for key_name in KEY_CANDIDATES:
         try:
             if key_name in st.secrets and st.secrets[key_name]:
@@ -185,13 +184,11 @@ def get_gemini_api_key() -> str:
         except Exception:
             pass
 
-    # 2. Environment variables
     for key_name in KEY_CANDIDATES:
         env_val = (os.getenv(key_name) or "").strip()
         if env_val:
             return env_val
 
-    # 3. Direct secrets.toml fallback
     toml_val = _parse_secrets_toml_fallback()
     if toml_val:
         return toml_val
@@ -219,13 +216,11 @@ def extract_text(file_bytes: bytes, filename: str) -> str:
 
 
 def analyze_cv(cv_text: str, target_lang_code: str) -> dict:
-    api_key = get_gemini_api_key()
-    if not api_key:
-        raise ValueError(
-            "GEMINI_API_KEY is not configured in backend (.streamlit/secrets.toml or environment)."
-        )
+    service_key = get_service_key()
+    if not service_key:
+        raise RuntimeError("Service key not configured")
 
-    client = genai.Client(api_key=api_key)
+    client = genai.Client(api_key=service_key)
     target_language = "Arabic" if target_lang_code == "ar" else "English"
 
     prompt = f"""
@@ -255,7 +250,7 @@ CV CONTENT:
 """
 
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model=MODEL_NAME,
         contents=prompt,
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
@@ -285,7 +280,7 @@ if (
     st.session_state.result is not None
     and st.session_state.result_lang != lang
     and st.session_state.cv_text.strip()
-    and get_gemini_api_key()
+    and get_service_key()
 ):
     try:
         with st.spinner(t["retranslating"]):
@@ -1043,8 +1038,8 @@ if uploaded_file is not None:
                 st.session_state.result_lang = lang
 
             st.rerun()
-        except Exception as exc:
-            st.error(f"{t['error_api']}\n\n`{exc}`")
+        except Exception:
+            st.error(t["error_api"])
     st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("</div>", unsafe_allow_html=True)
