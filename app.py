@@ -41,14 +41,12 @@ TEXT = {
         "hero": "سيرتك الذاتية،",
         "hero_highlight": "بشكل أقوى.",
         "description": "اكتشف نقاط قوتك، قيّم مهاراتك، واعرف كيف تطوّر سيرتك الذاتية لتكون أكثر احترافية وجاهزية لسوق العمل.",
-        "start": "ابدأ تحليل سيرتك الذاتية",
         "upload": "حلّل سيرتك الذاتية",
         "upload_hint": "ارفع ملفك ودعنا نساعدك على اكتشاف إمكانياته.",
         "drop": "اسحب ملفك هنا أو اضغط للاختيار",
         "formats": "PDF أو DOCX • حتى 10 ميجابايت",
         "analyze": "ابدأ التحليل الذكي",
         "loading": "نحلل سيرتك الذاتية الآن...",
-        "loading_hint": "نراجع المهارات والخبرات وجودة المحتوى",
         "score": "درجة جاهزية السيرة الذاتية",
         "summary": "نظرة عامة",
         "skills": "المهارات المكتشفة",
@@ -56,12 +54,10 @@ TEXT = {
         "strengths": "نقاط القوة",
         "suggestions": "توصياتنا لك",
         "new": "تحليل سيرة ذاتية جديدة",
-        "error_file": "يرجى اختيار ملف PDF أو DOCX.",
         "error_size": "حجم الملف أكبر من 10 ميجابايت.",
         "error_text": "تعذر استخراج النص من الملف. تأكد أن الملف يحتوي على نص قابل للقراءة.",
         "error_api": "تعذر إتمام التحليل. تأكد من إعدادات الخدمة وحاول مرة أخرى.",
-        "footer": "CVision AI",
-        "footer_desc": "خطوة أذكى نحو فرصتك المهنية القادمة.",
+        "footer": "خطوة أذكى نحو فرصتك المهنية القادمة.",
         "f1": "ارفع ملفك",
         "f1d": "ارفع سيرتك الذاتية بسهولة.",
         "f2": "تحليل ذكي",
@@ -77,23 +73,21 @@ TEXT = {
         "empty": "لا توجد عناصر لعرضها حاليًا.",
         "file_ready": "ملفك جاهز للتحليل",
         "secure": "تحليل سريع • تجربة سهلة • نتائج واضحة",
-        "home": "الرئيسية",
         "analysis_note": "هذا التقييم استرشادي لجودة السيرة الذاتية، وليس ضمانًا للقبول الوظيفي."
     },
+
     "en": {
         "subtitle": "Your intelligent CV analysis platform",
         "badge": "ARTIFICIAL INTELLIGENCE • PROFESSIONAL ANALYSIS",
         "hero": "Make your CV",
         "hero_highlight": "stand out.",
         "description": "Discover your strengths, evaluate your skills, and learn how to improve your resume to become more professional and job-ready.",
-        "start": "Analyze Your CV",
         "upload": "Analyze Your Resume",
         "upload_hint": "Upload your file and let us uncover its potential.",
         "drop": "Drag your file here or click to browse",
         "formats": "PDF or DOCX • Up to 10 MB",
         "analyze": "Start Smart Analysis",
         "loading": "Analyzing your CV...",
-        "loading_hint": "Reviewing your skills, experience and content",
         "score": "CV Readiness Score",
         "summary": "Overview",
         "skills": "Identified Skills",
@@ -101,12 +95,10 @@ TEXT = {
         "strengths": "Your Strengths",
         "suggestions": "Our Recommendations",
         "new": "Analyze Another CV",
-        "error_file": "Please upload a PDF or DOCX file.",
         "error_size": "File size exceeds 10 MB.",
         "error_text": "Could not extract readable text from this file.",
         "error_api": "Analysis failed. Please check the service configuration and try again.",
-        "footer": "CVision AI",
-        "footer_desc": "A smarter step towards your next career opportunity.",
+        "footer": "A smarter step towards your next career opportunity.",
         "f1": "Upload your CV",
         "f1d": "Upload your resume easily.",
         "f2": "Smart analysis",
@@ -122,19 +114,16 @@ TEXT = {
         "empty": "No items to display.",
         "file_ready": "Your file is ready for analysis",
         "secure": "Fast analysis • Easy experience • Clear results",
-        "home": "Home",
         "analysis_note": "This score is an indicative CV quality assessment, not a guarantee of employment."
     }
 }
 
 t = TEXT[st.session_state.lang]
 ar = st.session_state.lang == "ar"
-direction = "rtl" if ar else "ltr"
-align = "right" if ar else "left"
 font = "Cairo" if ar else "Inter"
 
 # =========================
-# DESIGN SYSTEM
+# DESIGN
 # =========================
 
 st.markdown(f"""
@@ -144,7 +133,6 @@ st.markdown(f"""
 :root {{
     --primary: #2563eb;
     --primary-dark: #1745b8;
-    --blue-light: #eff6ff;
     --text: #10213f;
     --muted: #718096;
     --border: #e6edf7;
@@ -167,13 +155,9 @@ html, body, [class*="css"] {{
     background: transparent;
 }}
 
-[data-testid="stToolbar"] {{
-    right: 1rem;
-}}
-
 .block-container {{
     max-width: 1160px;
-    padding-top: 1.2rem;
+    padding-top: 1rem;
     padding-bottom: 2rem;
 }}
 
@@ -189,19 +173,19 @@ h1, h2, h3 {{
     visibility: hidden;
 }}
 
-header {{
-    visibility: visible;
-}}
-
 [data-testid="stSelectbox"] {{
-    max-width: 145px;
-    margin-inline-start: auto;
+    width: 115px !important;
+    min-width: 115px !important;
+    margin-left: auto;
+    margin-right: 0;
 }}
 
 [data-testid="stSelectbox"] > div > div {{
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: white;
+    min-height: 36px !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+    border: 1px solid #dbeafe !important;
+    background: white !important;
 }}
 
 .brand {{
@@ -209,7 +193,7 @@ header {{
     align-items: center;
     justify-content: center;
     gap: 10px;
-    margin: 10px 0 0;
+    margin: 5px 0 0;
 }}
 
 .brand-icon {{
@@ -263,7 +247,7 @@ header {{
     border-radius: 50%;
     border: 1px solid rgba(255,255,255,.13);
     top: -160px;
-    { "left" if ar else "right" }: -60px;
+    left: -60px;
 }}
 
 .hero:after {{
@@ -274,7 +258,7 @@ header {{
     border-radius: 50%;
     background: rgba(255,255,255,.055);
     bottom: -120px;
-    { "right" if ar else "left" }: 5%;
+    right: 5%;
 }}
 
 .hero-content {{
@@ -291,7 +275,6 @@ header {{
     padding: 8px 17px;
     font-size: 12px;
     font-weight: 700;
-    letter-spacing: .3px;
     margin-bottom: 20px;
 }}
 
@@ -347,7 +330,7 @@ header {{
     min-height: 145px;
     box-shadow: 0 7px 22px rgba(31,65,114,.035);
     transition: all .25s ease;
-    text-align: {align};
+    text-align: center;
 }}
 
 .feature-card:hover {{
@@ -365,7 +348,7 @@ header {{
     justify-content: center;
     background: #eff6ff;
     font-size: 20px;
-    margin-bottom: 13px;
+    margin: 0 auto 13px;
 }}
 
 .feature-card strong {{
@@ -394,14 +377,14 @@ header {{
     color: #15366c;
     font-size: 22px;
     font-weight: 900;
-    text-align: {align};
+    text-align: center;
     margin-bottom: 5px;
 }}
 
 .panel-description {{
     color: #8290a7;
     font-size: 13px;
-    text-align: {align};
+    text-align: center;
     margin-bottom: 20px;
 }}
 
@@ -444,10 +427,6 @@ div.stButton > button:hover {{
     border: none;
     transform: translateY(-2px);
     box-shadow: 0 12px 25px rgba(37,99,235,.25);
-}}
-
-div.stButton > button:focus {{
-    color: white;
 }}
 
 [data-testid="stProgress"] > div > div {{
@@ -495,7 +474,6 @@ div.stButton > button:focus {{
     display: flex;
     align-items: center;
     justify-content: center;
-    background: conic-gradient(#3b82f6 { "{score}" }%, #e8effa 0);
     position: relative;
 }}
 
@@ -532,20 +510,6 @@ div.stButton > button:focus {{
     font-weight: 800;
 }}
 
-.result-box {{
-    background: white;
-    border: 1px solid #e7edf7;
-    border-radius: 17px;
-    padding: 22px;
-    margin: 12px 0;
-    color: #43536d;
-    line-height: 2;
-    font-size: 14px;
-    box-shadow: 0 5px 20px rgba(31,65,114,.035);
-    text-align: {align};
-    overflow-wrap: anywhere;
-}}
-
 .result-card {{
     background: white;
     border: 1px solid #e7edf7;
@@ -561,7 +525,7 @@ div.stButton > button:focus {{
     font-weight: 900;
     font-size: 15px;
     margin-bottom: 13px;
-    text-align: {align};
+    text-align: center;
 }}
 
 .result-item {{
@@ -570,7 +534,7 @@ div.stButton > button:focus {{
     line-height: 1.9;
     padding: 7px 0;
     border-bottom: 1px solid #f0f3f8;
-    text-align: {align};
+    text-align: {'right' if ar else 'left'};
     overflow-wrap: anywhere;
 }}
 
@@ -625,13 +589,14 @@ div.stButton > button:focus {{
 # LANGUAGE SWITCH
 # =========================
 
-top1, top2 = st.columns([5, 1])
+top_space, lang_col = st.columns([8, 1])
 
-with top2:
+with lang_col:
     language = st.selectbox(
         "Language",
         ["العربية", "English"],
         index=0 if ar else 1,
+        key="language_selector",
         label_visibility="collapsed"
     )
 
@@ -876,7 +841,8 @@ if st.session_state.result:
         st.markdown(f"""
         <div class="score-card">
             <div class="score-label">{t["score"]}</div>
-            <div class="score-circle" style="background:conic-gradient(#3b82f6 {score}%,#e8effa 0);">
+            <div class="score-circle"
+                 style="background:conic-gradient(#3b82f6 {score}%,#e8effa 0);">
                 <div class="score-value">{score}%</div>
             </div>
             <div class="score-status">{status}</div>
@@ -889,7 +855,7 @@ if st.session_state.result:
         st.markdown(f"""
         <div class="result-card" style="height:100%;">
             <div class="result-card-title">✦ {t["summary"]}</div>
-            <div style="color:#5b6b82;font-size:14px;line-height:2;">
+            <div style="color:#5b6b82;font-size:14px;line-height:2;text-align:center;">
                 {safe_summary}
             </div>
         </div>
@@ -950,7 +916,7 @@ if st.session_state.result:
 st.markdown(f"""
 <div class="footer">
     <strong>CVision AI</strong>
-    <div style="margin-top:6px;">{t["footer_desc"]}</div>
+    <div style="margin-top:6px;">{t["footer"]}</div>
     <div style="margin-top:12px;font-size:10px;">© 2026 CVision AI. All rights reserved.</div>
 </div>
 """, unsafe_allow_html=True)
