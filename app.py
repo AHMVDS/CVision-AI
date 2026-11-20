@@ -271,4 +271,839 @@ components.html(
 st.markdown(
     f"""
     <style>
-    @import url('
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+    :root {{
+        --blue-900: #0f295a;
+        --blue-800: #163d82;
+        --blue-700: #1d4ed8;
+        --blue-600: #2563eb;
+        --blue-500: #3b82f6;
+        --blue-200: #bfdbfe;
+        --blue-100: #dbeafe;
+        --blue-50:  #eff6ff;
+        --bg-top:   #f8fbff;
+        --bg-bot:   #eef4fc;
+        --surface:  #ffffff;
+        --ink:      #0f2140;
+        --muted:    #64748b;
+        --border:   #e2ebf7;
+        --shadow-sm: 0 6px 20px rgba(15, 41, 90, 0.05);
+        --shadow-md: 0 14px 36px rgba(37, 99, 235, 0.09);
+        --shadow-lg: 0 24px 60px rgba(15, 41, 90, 0.16);
+    }}
+
+    .stApp {{
+        background:
+            radial-gradient(circle at 8% 4%, rgba(59, 130, 246, 0.12), transparent 34%),
+            radial-gradient(circle at 92% 14%, rgba(37, 99, 235, 0.10), transparent 32%),
+            linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bot) 100%);
+        color: var(--ink);
+        font-family: '{font}', sans-serif;
+        direction: {direction};
+    }}
+
+    html, body, [class*="css"], .stMarkdown, .stText, label, input, textarea, button {{
+        font-family: '{font}', sans-serif !important;
+    }}
+
+    [data-testid="stAppViewContainer"] {{
+        direction: {direction};
+    }}
+
+    [data-testid="stHeader"] {{
+        background: transparent;
+        height: 2.5rem;
+    }}
+
+    .block-container {{
+        max-width: 1160px;
+        padding-top: 0.75rem;
+        padding-bottom: 3rem;
+    }}
+
+    #MainMenu, footer, [data-testid="stToolbar"] {{
+        visibility: hidden;
+    }}
+
+    /* TOP BAR & LANGUAGE TOGGLE */
+    .topbar-card {{
+        background: rgba(255, 255, 255, 0.88);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 12px 20px;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 18px;
+    }}
+
+    .brand-inline {{
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }}
+
+    .brand-badge {{
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+        background: linear-gradient(135deg, var(--blue-600), var(--blue-500));
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 19px;
+        font-weight: 800;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+        flex-shrink: 0;
+    }}
+
+    .brand-title {{
+        font-size: 21px;
+        font-weight: 900;
+        color: var(--blue-900);
+        line-height: 1.15;
+        letter-spacing: -0.4px;
+    }}
+
+    .brand-title span {{
+        color: var(--blue-600);
+    }}
+
+    .brand-caption {{
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+    }}
+
+    .st-key-lang_switch_wrap div.stButton > button {{
+        min-height: 38px;
+        height: 38px;
+        width: 100%;
+        border-radius: 12px;
+        background: var(--blue-50);
+        color: var(--blue-700);
+        border: 1px solid var(--blue-200);
+        font-size: 13px;
+        font-weight: 800;
+        padding: 0 14px;
+        box-shadow: none;
+        transition: all 0.2s ease;
+    }}
+
+    .st-key-lang_switch_wrap div.stButton > button:hover {{
+        background: var(--blue-600);
+        color: #ffffff;
+        border-color: var(--blue-600);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.22);
+    }}
+
+    /* HERO BANNER */
+    .hero-box {{
+        position: relative;
+        overflow: hidden;
+        background:
+            radial-gradient(circle at 85% 15%, rgba(147, 197, 253, 0.24), transparent 34%),
+            radial-gradient(circle at 15% 85%, rgba(96, 165, 250, 0.18), transparent 35%),
+            linear-gradient(125deg, var(--blue-900) 0%, var(--blue-800) 52%, var(--blue-600) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 28px;
+        padding: 56px 36px;
+        margin: 8px 0 28px;
+        text-align: center;
+        box-shadow: var(--shadow-lg);
+    }}
+
+    .hero-ring {{
+        position: absolute;
+        width: 340px;
+        height: 340px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        top: -150px;
+        {opposite_align}: -70px;
+        pointer-events: none;
+    }}
+
+    .hero-inner {{
+        position: relative;
+        z-index: 2;
+    }}
+
+    .hero-pill {{
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        color: #eff6ff;
+        padding: 7px 16px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+        margin-bottom: 18px;
+        backdrop-filter: blur(8px);
+    }}
+
+    .hero-box h1 {{
+        color: #ffffff;
+        font-size: clamp(32px, 4.6vw, 52px);
+        font-weight: 900;
+        line-height: 1.28;
+        margin: 0 0 14px;
+    }}
+
+    .hero-box h1 span {{
+        color: #93c5fd;
+    }}
+
+    .hero-box p {{
+        color: #dbeafe;
+        font-size: 15px;
+        line-height: 1.9;
+        max-width: 720px;
+        margin: 0 auto 24px;
+    }}
+
+    .hero-trust {{
+        display: inline-block;
+        background: rgba(15, 41, 90, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        color: #e0f2fe;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 8px 18px;
+        border-radius: 999px;
+    }}
+
+    /* SECTION KICKER */
+    .kicker {{
+        text-align: center;
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 1.1px;
+        color: var(--blue-700);
+        margin: 26px 0 14px;
+    }}
+
+    /* FEATURE CARDS */
+    .step-card {{
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 24px 20px;
+        height: 100%;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        text-align: {text_align};
+    }}
+
+    .step-card:hover {{
+        transform: translateY(-4px);
+        border-color: var(--blue-200);
+        box-shadow: var(--shadow-md);
+    }}
+
+    .step-icon {{
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--blue-50), var(--blue-100));
+        border: 1px solid var(--blue-200);
+        color: var(--blue-700);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin-bottom: 14px;
+    }}
+
+    .step-card strong {{
+        display: block;
+        color: var(--blue-900);
+        font-size: 16px;
+        font-weight: 800;
+        margin-bottom: 6px;
+    }}
+
+    .step-card span {{
+        display: block;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.75;
+    }}
+
+    /* UPLOAD SECTION */
+    .upload-shell {{
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 26px;
+        padding: 28px 28px 16px;
+        margin-top: 32px;
+        box-shadow: var(--shadow-md);
+    }}
+
+    .upload-title {{
+        font-size: 22px;
+        font-weight: 900;
+        color: var(--blue-900);
+        margin-bottom: 6px;
+        text-align: {text_align};
+    }}
+
+    .upload-sub {{
+        font-size: 13.5px;
+        color: var(--muted);
+        margin-bottom: 18px;
+        text-align: {text_align};
+        line-height: 1.75;
+    }}
+
+    [data-testid="stFileUploader"] {{
+        border: 2px dashed #93c5fd !important;
+        border-radius: 20px !important;
+        background: linear-gradient(180deg, #f8fbff 0%, #eff6ff 100%) !important;
+        padding: 18px !important;
+        transition: all 0.2s ease;
+    }}
+
+    [data-testid="stFileUploader"]:hover {{
+        border-color: var(--blue-600) !important;
+        background: #e8f1fe !important;
+    }}
+
+    [data-testid="stFileUploader"] section {{
+        border: none !important;
+        background: transparent !important;
+    }}
+
+    .file-meta-card {{
+        background: var(--blue-50);
+        border: 1px solid var(--blue-200);
+        border-radius: 16px;
+        padding: 14px 18px;
+        margin: 14px 0 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }}
+
+    .file-meta-main {{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--blue-900);
+        font-weight: 800;
+        font-size: 14px;
+    }}
+
+    .file-meta-tag {{
+        background: #ffffff;
+        color: var(--blue-700);
+        border: 1px solid var(--blue-200);
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+    }}
+
+    /* PRIMARY ACTION BUTTONS */
+    div.stButton > button {{
+        background: linear-gradient(115deg, var(--blue-700) 0%, var(--blue-600) 55%, var(--blue-500) 100%);
+        color: #ffffff;
+        border: none;
+        border-radius: 15px;
+        min-height: 50px;
+        font-size: 15px;
+        font-weight: 800;
+        box-shadow: 0 10px 24px rgba(37, 99, 235, 0.24);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    }}
+
+    div.stButton > button:hover {{
+        color: #ffffff;
+        transform: translateY(-2px);
+        filter: brightness(1.04);
+        box-shadow: 0 14px 28px rgba(37, 99, 235, 0.32);
+    }}
+
+    [data-testid="stAlert"] {{
+        border-radius: 15px;
+        direction: {direction};
+        text-align: {text_align};
+    }}
+
+    /* RESULTS SECTION */
+    .report-banner {{
+        background:
+            radial-gradient(circle at 88% 20%, rgba(147, 197, 253, 0.24), transparent 36%),
+            linear-gradient(125deg, var(--blue-900) 0%, var(--blue-700) 100%);
+        border-radius: 24px;
+        padding: 28px 32px;
+        color: #ffffff;
+        margin-top: 34px;
+        margin-bottom: 18px;
+        box-shadow: var(--shadow-lg);
+        text-align: {text_align};
+    }}
+
+    .report-banner small {{
+        display: block;
+        color: #bfdbfe;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+        margin-bottom: 6px;
+    }}
+
+    .report-banner h2 {{
+        color: #ffffff;
+        font-size: 26px;
+        font-weight: 900;
+        margin: 0;
+    }}
+
+    .score-panel {{
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 24px 18px;
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+        height: 100%;
+    }}
+
+    .score-ring {{
+        width: 156px;
+        height: 156px;
+        border-radius: 50%;
+        margin: 16px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        box-shadow: inset 0 0 0 1px var(--border);
+    }}
+
+    .score-ring::before {{
+        content: "";
+        position: absolute;
+        width: 126px;
+        height: 126px;
+        background: var(--surface);
+        border-radius: 50%;
+        box-shadow: var(--shadow-sm);
+    }}
+
+    .score-num {{
+        position: relative;
+        z-index: 2;
+        font-size: 36px;
+        font-weight: 900;
+        color: var(--blue-800);
+    }}
+
+    .score-title {{
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--muted);
+    }}
+
+    .score-badge {{
+        display: inline-block;
+        background: var(--blue-50);
+        color: var(--blue-700);
+        border: 1px solid var(--blue-200);
+        padding: 6px 16px;
+        border-radius: 999px;
+        font-size: 12.5px;
+        font-weight: 800;
+    }}
+
+    .insight-card {{
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 22px 24px;
+        box-shadow: var(--shadow-sm);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        height: 100%;
+    }}
+
+    .insight-card:hover {{
+        border-color: var(--blue-200);
+        box-shadow: var(--shadow-md);
+    }}
+
+    .insight-head {{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+        border-bottom: 1px solid #eef3fa;
+    }}
+
+    .insight-title {{
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 15.5px;
+        font-weight: 900;
+        color: var(--blue-900);
+    }}
+
+    .insight-pill {{
+        background: var(--blue-50);
+        color: var(--blue-700);
+        font-size: 11.5px;
+        font-weight: 800;
+        padding: 3px 10px;
+        border-radius: 999px;
+    }}
+
+    .insight-row {{
+        color: #475569;
+        font-size: 13.5px;
+        line-height: 1.85;
+        padding: 8px 0;
+        border-bottom: 1px dashed #e8eef7;
+        text-align: {text_align};
+        overflow-wrap: anywhere;
+    }}
+
+    .insight-row:last-child {{
+        border-bottom: none;
+        padding-bottom: 2px;
+    }}
+
+    .disclaimer-text {{
+        text-align: center;
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 18px;
+        line-height: 1.8;
+    }}
+
+    .saas-footer {{
+        margin-top: 52px;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--muted);
+        font-size: 12.5px;
+    }}
+
+    .saas-footer strong {{
+        color: var(--blue-800);
+        font-size: 16px;
+        font-weight: 900;
+    }}
+
+    @media (max-width: 768px) {{
+        .hero-box {{
+            padding: 38px 20px;
+            border-radius: 22px;
+        }}
+        .upload-shell {{
+            padding: 20px 16px 12px;
+            border-radius: 20px;
+        }}
+        .report-banner {{
+            padding: 22px 18px;
+            border-radius: 20px;
+        }}
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+# =========================
+# TOP BAR & LANGUAGE BUTTON
+# =========================
+
+st.markdown('<div class="topbar-card">', unsafe_allow_html=True)
+top_left, top_right = st.columns([8, 2], vertical_alignment="center")
+
+with top_left:
+    st.markdown(
+        """
+        <div class="brand-inline">
+            <div class="brand-badge">✦</div>
+            <div>
+                <div class="brand-title">CVision <span>AI</span></div>
+                <div class="brand-caption">Smart Resume &amp; ATS Evaluation Suite</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+with top_right:
+    st.markdown('<div class="st-key-lang_switch_wrap">', unsafe_allow_html=True)
+    st.button(
+        t["switch_label"],
+        key="language_toggle_btn",
+        help=t["switch_help"],
+        on_click=toggle_language,
+        use_container_width=True,
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
+
+st.markdown("</div>", unsafe_allow_html=True)
+
+
+# =========================
+# HERO SECTION
+# =========================
+
+st.markdown(
+    f"""
+    <div class="hero-box">
+        <div class="hero-ring"></div>
+        <div class="hero-inner">
+            <div class="hero-pill">✦ {html.escape(t["badge"])}</div>
+            <h1>{html.escape(t["hero"])}<br><span>{html.escape(t["hero_highlight"])}</span></h1>
+            <p>{html.escape(t["description"])}</p>
+            <div class="hero-trust">✧ {html.escape(t["secure"])}</div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+# =========================
+# 3-STEP OVERVIEW
+# =========================
+
+st.markdown(f'<div class="kicker">{html.escape(t["step"])}</div>', unsafe_allow_html=True)
+
+steps = [
+    ("📄", "f1", "f1d"),
+    ("✦", "f2", "f2d"),
+    ("🚀", "f3", "f3d"),
+]
+
+step_cols = st.columns(3)
+for col, (icon, title_k, desc_k) in zip(step_cols, steps):
+    with col:
+        st.markdown(
+            f"""
+            <div class="step-card">
+                <div class="step-icon">{icon}</div>
+                <strong>{html.escape(t[title_k])}</strong>
+                <span>{html.escape(t[desc_k])}</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
+# =========================
+# UPLOAD & ANALYSIS WORKFLOW
+# =========================
+
+st.markdown(
+    f"""
+    <div class="upload-shell">
+        <div class="upload-title">📄 {html.escape(t["upload"])}</div>
+        <div class="upload-sub">{html.escape(t["upload_hint"])}</div>
+    """,
+    unsafe_allow_html=True,
+)
+
+uploaded_file = st.file_uploader(
+    t["drop"],
+    type=["pdf", "docx"],
+    key="cv_file_uploader",
+    help=t["formats"],
+)
+
+st.markdown(
+    f'<div style="color:#64748b;font-size:12px;margin-top:6px;text-align:{text_align};">{html.escape(t["formats"])}</div>',
+    unsafe_allow_html=True,
+)
+
+if uploaded_file is not None:
+    size_mb = uploaded_file.size / (1024 * 1024)
+    if uploaded_file.size > 10 * 1024 * 1024:
+        st.error(t["error_size"])
+        st.stop()
+
+    st.markdown(
+        f"""
+        <div class="file-meta-card">
+            <div class="file-meta-main">
+                <span>✓</span>
+                <span>{html.escape(t["file_ready"])}: {html.escape(uploaded_file.name)}</span>
+            </div>
+            <div class="file-meta-tag">{html.escape(t["file_size_label"])}: {size_mb:.2f} MB</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    if st.button(t["analyze"], key="run_analysis_btn", use_container_width=True):
+        try:
+            with st.spinner(t["loading"]):
+                extracted = extract_text(uploaded_file.getvalue(), uploaded_file.name)
+                if not extracted or len(extracted.strip()) < 15:
+                    st.error(t["error_text"])
+                    st.stop()
+
+                analysis_data = analyze_cv(extracted, lang)
+                st.session_state.cv_text = extracted
+                st.session_state.file_name = uploaded_file.name
+                st.session_state.result = analysis_data
+                st.session_state.result_lang = lang
+
+            st.rerun()
+        except Exception:
+            st.error(t["error_api"])
+
+st.markdown("</div>", unsafe_allow_html=True)
+
+
+# =========================
+# ANALYSIS RESULTS VIEW
+# =========================
+
+if st.session_state.result is not None:
+    result = st.session_state.result
+    raw_score = result.get("compatibilityScore", 0)
+    try:
+        score = max(0, min(100, int(raw_score)))
+    except (TypeError, ValueError):
+        score = 0
+
+    if score >= 85:
+        status_label = t["excellent"]
+        ring_color = "#16a34a"
+    elif score >= 70:
+        status_label = t["good"]
+        ring_color = "#2563eb"
+    elif score >= 50:
+        status_label = t["average"]
+        ring_color = "#d97706"
+    else:
+        status_label = t["weak"]
+        ring_color = "#dc2626"
+
+    st.markdown(
+        f"""
+        <div class="report-banner">
+            <small>{html.escape(t["result_label"])}</small>
+            <h2>📊 {html.escape(t["result_title"])}</h2>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    top_res_left, top_res_right = st.columns([1, 1.65])
+
+    with top_res_left:
+        st.markdown(
+            f"""
+            <div class="score-panel">
+                <div class="score-title">{html.escape(t["score"])}</div>
+                <div class="score-ring" style="background: conic-gradient({ring_color} {score}%, #e2ebf7 0);">
+                    <div class="score-num">{score}%</div>
+                </div>
+                <div class="score-badge">{html.escape(status_label)}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with top_res_right:
+        safe_summary = html.escape(str(result.get("summary", "") or t["empty"]))
+        st.markdown(
+            f"""
+            <div class="insight-card">
+                <div class="insight-head">
+                    <div class="insight-title"><span>✦</span><span>{html.escape(t["summary"])}</span></div>
+                </div>
+                <div style="color:#334155;font-size:14.5px;line-height:1.95;text-align:{text_align};">
+                    {safe_summary}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown('<div style="height:16px;"></div>', unsafe_allow_html=True)
+
+    detail_sections = [
+        ("💡", "skills", "matchingSkills"),
+        ("⚠️", "missing", "missingSkills"),
+        ("⭐", "strengths", "strengths"),
+        ("🚀", "suggestions", "suggestions"),
+    ]
+
+    grid_cols = st.columns(2)
+    for idx, (icon, label_key, data_key) in enumerate(detail_sections):
+        items = result.get(data_key, [])
+        if not isinstance(items, list):
+            items = []
+
+        cleaned_items = [str(x).strip() for x in items if str(x).strip()]
+        count_text = f"{len(cleaned_items)} {t['items_count']}"
+
+        if cleaned_items:
+            rows_html = "".join(
+                f'<div class="insight-row">• {html.escape(item)}</div>'
+                for item in cleaned_items
+            )
+        else:
+            rows_html = f'<div class="insight-row">{html.escape(t["empty"])}</div>'
+
+        with grid_cols[idx % 2]:
+            st.markdown(
+                f"""
+                <div class="insight-card" style="margin-bottom:16px;">
+                    <div class="insight-head">
+                        <div class="insight-title"><span>{icon}</span><span>{html.escape(t[label_key])}</span></div>
+                        <span class="insight-pill">{html.escape(count_text)}</span>
+                    </div>
+                    {rows_html}
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    st.markdown(
+        f'<div class="disclaimer-text">{html.escape(t["analysis_note"])}</div>',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown('<div style="height:14px;"></div>', unsafe_allow_html=True)
+
+    if st.button(t["new"], key="reset_analysis_btn", use_container_width=True):
+        st.session_state.result = None
+        st.session_state.result_lang = None
+        st.session_state.cv_text = ""
+        st.session_state.file_name = ""
+        st.rerun()
+
+
+# =========================
+# FOOTER
+# =========================
+
+st.markdown(
+    f"""
+    <div class="saas-footer">
+        <strong>CVision AI</strong>
+        <div style="margin-top:6px;">{html.escape(t["footer"])}</div>
+        <div style="margin-top:10px;font-size:11px;color:#94a3b8;">© 2026 CVision AI. All rights reserved.</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
