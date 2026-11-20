@@ -1157,4 +1157,42 @@ if st.session_state.result is not None:
                 <div class="insight-card" style="margin-bottom:16px;">
                     <div class="insight-head">
                         <div class="insight-title"><span>{icon}</span><span>{html.escape(t[label_key])}</span></div>
-                        <span class="insight-pill">{html.escape(
+                        <span class="insight-pill">{html.escape(count_text)}</span>
+                    </div>
+                    {rows_html}
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    st.markdown(
+        f'<div class="disclaimer-text">{html.escape(t["analysis_note"])}</div>',
+        unsafe_allow_html=True,
+    )
+
+    st.markdown('<div style="height:14px;"></div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="action-btn-wrap">', unsafe_allow_html=True)
+    if st.button(t["new"], key="reset_analysis_btn", use_container_width=True):
+        st.session_state.result = None
+        st.session_state.result_lang = None
+        st.session_state.cv_text = ""
+        st.session_state.file_name = ""
+        st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
+# =========================
+# FOOTER
+# =========================
+
+st.markdown(
+    f"""
+    <div class="saas-footer">
+        <strong>CVision AI</strong>
+        <div style="margin-top:6px;">{html.escape(t["footer"])}</div>
+        <div style="margin-top:10px;font-size:11px;color:#94a3b8;">© 2026 CVision AI. All rights reserved.</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
