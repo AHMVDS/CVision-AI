@@ -30,6 +30,27 @@ if "result" not in st.session_state:
 if "cv_text" not in st.session_state:
     st.session_state.cv_text = ""
 
+def toggle_language():
+    st.session_state.lang = (
+        "en" if st.session_state.lang == "ar" else "ar"
+    )
+
+# =========================
+# LANGUAGE SWITCH
+# =========================
+
+with st.container(key="language_bar"):
+    space, lang_col = st.columns([10, 1])
+
+    with lang_col:
+        st.button(
+            "EN" if st.session_state.lang == "ar" else "عربي",
+            key="language_toggle",
+            on_click=toggle_language,
+            use_container_width=True,
+            type="secondary"
+        )
+
 # =========================
 # TRANSLATIONS
 # =========================
@@ -118,12 +139,18 @@ TEXT = {
     }
 }
 
-t = TEXT[st.session_state.lang]
+# =========================
+# CURRENT LANGUAGE
+# =========================
+
 ar = st.session_state.lang == "ar"
+t = TEXT[st.session_state.lang]
 font = "Cairo" if ar else "Inter"
+direction = "rtl" if ar else "ltr"
+text_align = "right" if ar else "left"
 
 # =========================
-# DESIGN
+# DESIGN SYSTEM
 # =========================
 
 st.markdown(f"""
@@ -136,20 +163,29 @@ st.markdown(f"""
     --text: #10213f;
     --muted: #718096;
     --border: #e6edf7;
+    --surface: #ffffff;
+}}
+
+* {{
+    box-sizing: border-box;
 }}
 
 .stApp {{
     background:
-        radial-gradient(ellipse at 10% 5%, rgba(59,130,246,.12), transparent 30%),
-        radial-gradient(ellipse at 90% 25%, rgba(96,165,250,.12), transparent 28%),
-        #f7f9fd;
+        radial-gradient(ellipse at 5% 5%, rgba(59,130,246,.13), transparent 32%),
+        radial-gradient(ellipse at 95% 20%, rgba(96,165,250,.13), transparent 30%),
+        linear-gradient(180deg, #f8faff 0%, #f2f6fd 100%);
     color: var(--text);
     font-family: '{font}', sans-serif;
-    direction: {'rtl' if ar else 'ltr'};
+    direction: {direction};
 }}
 
 html, body, [class*="css"] {{
     font-family: '{font}', sans-serif;
+}}
+
+[data-testid="stAppViewContainer"] {{
+    direction: {direction};
 }}
 
 [data-testid="stHeader"] {{
@@ -157,7 +193,7 @@ html, body, [class*="css"] {{
 }}
 
 .block-container {{
-    max-width: 1160px;
+    max-width: 1180px;
     padding-top: 1rem;
     padding-bottom: 2rem;
 }}
@@ -166,19 +202,21 @@ h1, h2, h3, p {{
     font-family: '{font}', sans-serif;
 }}
 
-h1, h2, h3 {{
-    color: var(--text);
-}}
-
 #MainMenu, footer {{
     visibility: hidden;
 }}
 
-/* Language button */
+/* LANGUAGE BUTTON */
 
-div[data-testid="stHorizontalBlock"]:first-of-type
-div[data-testid="stButton"] button {{
+.st-key-language_bar {{
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 5px;
+}}
+
+.st-key-language_bar div.stButton > button {{
     min-height: 36px;
+    width: 65px;
     border-radius: 11px;
     background: white;
     color: #2563eb;
@@ -186,42 +224,40 @@ div[data-testid="stButton"] button {{
     font-size: 12px;
     font-weight: 900;
     padding: 0 12px;
-    box-shadow: 0 3px 12px rgba(37,99,235,.07);
+    box-shadow: 0 4px 13px rgba(37,99,235,.08);
 }}
 
-div[data-testid="stHorizontalBlock"]:first-of-type
-div[data-testid="stButton"] button:hover {{
+.st-key-language_bar div.stButton > button:hover {{
     background: #eff6ff;
     color: #1745b8;
     border-color: #93c5fd;
-    transform: translateY(-1px);
 }}
 
-/* Brand */
+/* BRAND */
 
 .brand {{
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    margin: 5px 0 0;
+    gap: 12px;
+    margin: 8px 0 0;
 }}
 
 .brand-icon {{
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg,#2563eb,#60a5fa);
     color: white;
-    border-radius: 15px;
-    font-size: 22px;
-    box-shadow: 0 8px 22px rgba(37,99,235,.27);
+    border-radius: 16px;
+    font-size: 23px;
+    box-shadow: 0 9px 25px rgba(37,99,235,.25);
 }}
 
 .brand-name {{
-    font-size: 28px;
+    font-size: 30px;
     font-weight: 900;
     letter-spacing: -1px;
     color: #173b79;
@@ -233,44 +269,46 @@ div[data-testid="stButton"] button:hover {{
 
 .brand-sub {{
     color: #8493aa;
-    font-size: 11px;
-    letter-spacing: 1.2px;
+    font-size: 12px;
     text-align: center;
-    margin-top: 3px;
+    margin-top: 5px;
 }}
 
-/* Hero */
+/* HERO */
 
 .hero {{
     position: relative;
     overflow: hidden;
-    background: linear-gradient(120deg,#102d61 0%,#174b9d 55%,#347ce5 100%);
+    background:
+        radial-gradient(circle at 85% 15%, rgba(147,197,253,.22), transparent 28%),
+        linear-gradient(120deg,#102d61 0%,#174b9d 55%,#347ce5 100%);
+    border: 1px solid rgba(255,255,255,.12);
     border-radius: 30px;
-    padding: 70px 35px;
-    margin: 30px 0 28px;
+    padding: 76px 35px;
+    margin: 30px 0 32px;
     text-align: center;
-    box-shadow: 0 22px 55px rgba(23,69,184,.20);
+    box-shadow: 0 24px 60px rgba(23,69,184,.20);
 }}
 
 .hero:before {{
     content: "";
     position: absolute;
-    width: 330px;
-    height: 330px;
+    width: 370px;
+    height: 370px;
     border-radius: 50%;
-    border: 1px solid rgba(255,255,255,.15);
-    top: -170px;
-    left: -60px;
+    border: 1px solid rgba(255,255,255,.16);
+    top: -190px;
+    left: -65px;
 }}
 
 .hero:after {{
     content: "";
     position: absolute;
-    width: 230px;
-    height: 230px;
+    width: 250px;
+    height: 250px;
     border-radius: 50%;
     background: rgba(255,255,255,.07);
-    bottom: -130px;
+    bottom: -145px;
     right: 5%;
 }}
 
@@ -285,19 +323,19 @@ div[data-testid="stButton"] button:hover {{
     background: rgba(255,255,255,.12);
     border: 1px solid rgba(255,255,255,.20);
     border-radius: 50px;
-    padding: 9px 18px;
+    padding: 10px 19px;
     font-size: 12px;
-    font-weight: 700;
-    margin-bottom: 20px;
+    font-weight: 800;
+    margin-bottom: 22px;
     backdrop-filter: blur(8px);
 }}
 
 .hero h1 {{
     color: white;
-    font-size: clamp(32px,5vw,55px);
+    font-size: clamp(35px,5vw,58px);
     line-height: 1.35;
     font-weight: 900;
-    margin: 0 0 14px;
+    margin: 0 0 17px;
 }}
 
 .hero h1 span {{
@@ -308,43 +346,42 @@ div[data-testid="stButton"] button:hover {{
     color: #dbeafe;
     font-size: 15px;
     line-height: 2;
-    max-width: 680px;
+    max-width: 700px;
     margin: 0 auto;
 }}
 
 .hero-note {{
+    display: inline-block;
     color: #dbeafe;
     font-size: 11px;
-    margin-top: 25px;
-    opacity: .85;
+    margin-top: 28px;
+    opacity: .9;
+    background: rgba(255,255,255,.08);
+    padding: 9px 17px;
+    border-radius: 30px;
 }}
+
+/* SECTION HEADINGS */
 
 .section-kicker {{
     color: #3b82f6;
     font-size: 11px;
-    font-weight: 800;
+    font-weight: 900;
     letter-spacing: 1.4px;
     text-align: center;
-    margin-top: 34px;
+    margin-top: 35px;
+    margin-bottom: 18px;
 }}
 
-.section-heading {{
-    font-size: 25px;
-    font-weight: 900;
-    color: #142b50;
-    text-align: center;
-    margin: 5px 0 22px;
-}}
-
-/* Feature cards */
+/* FEATURE CARDS */
 
 .feature-card {{
-    background: rgba(255,255,255,.92);
+    background: rgba(255,255,255,.94);
     border: 1px solid #e7edf7;
-    border-radius: 20px;
-    padding: 23px 17px;
-    min-height: 145px;
-    box-shadow: 0 7px 22px rgba(31,65,114,.045);
+    border-radius: 21px;
+    padding: 25px 17px;
+    min-height: 160px;
+    box-shadow: 0 8px 24px rgba(31,65,114,.05);
     transition: all .25s ease;
     text-align: center;
 }}
@@ -352,26 +389,26 @@ div[data-testid="stButton"] button:hover {{
 .feature-card:hover {{
     transform: translateY(-5px);
     border-color: #bfdbfe;
-    box-shadow: 0 15px 30px rgba(37,99,235,.10);
+    box-shadow: 0 16px 34px rgba(37,99,235,.11);
 }}
 
 .feature-icon {{
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
+    width: 48px;
+    height: 48px;
+    border-radius: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg,#eff6ff,#dbeafe);
-    font-size: 20px;
-    margin: 0 auto 13px;
+    font-size: 21px;
+    margin: 0 auto 14px;
 }}
 
 .feature-card strong {{
     display: block;
     color: #173b79;
     font-size: 15px;
-    margin-bottom: 6px;
+    margin-bottom: 7px;
 }}
 
 .feature-card span {{
@@ -380,37 +417,38 @@ div[data-testid="stButton"] button:hover {{
     line-height: 1.8;
 }}
 
-/* Upload */
+/* UPLOAD PANEL */
 
 .upload-panel {{
-    background: rgba(255,255,255,.96);
+    background: rgba(255,255,255,.97);
     border: 1px solid #e3ebf7;
     border-radius: 25px;
     padding: 30px;
-    margin-top: 35px;
+    margin-top: 36px;
+    margin-bottom: 14px;
     box-shadow: 0 15px 40px rgba(31,65,114,.07);
 }}
 
 .panel-heading {{
     color: #15366c;
-    font-size: 22px;
+    font-size: 23px;
     font-weight: 900;
     text-align: center;
-    margin-bottom: 5px;
+    margin-bottom: 7px;
 }}
 
 .panel-description {{
     color: #8290a7;
     font-size: 13px;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
 }}
 
 [data-testid="stFileUploader"] {{
     border: 2px dashed #bfdbfe;
     border-radius: 19px;
     background: #f7faff;
-    padding: 14px;
+    padding: 16px;
     transition: all .2s ease;
 }}
 
@@ -427,7 +465,7 @@ div[data-testid="stButton"] button:hover {{
     border-radius: 10px;
 }}
 
-/* Buttons */
+/* GENERAL BUTTONS */
 
 div.stButton > button {{
     background: linear-gradient(110deg,#2563eb,#3478e5);
@@ -454,16 +492,25 @@ div.stButton > button:hover {{
     border-radius: 20px;
 }}
 
-/* Results */
+/* SUCCESS AND ALERTS */
+
+[data-testid="stAlert"] {{
+    border-radius: 14px;
+    border: 1px solid #e3ebf7;
+}}
+
+/* RESULTS */
 
 .result-header {{
-    background: linear-gradient(120deg,#102d61,#2563eb);
+    background:
+        radial-gradient(circle at 90% 10%, rgba(147,197,253,.20), transparent 30%),
+        linear-gradient(120deg,#102d61,#2563eb);
     border-radius: 23px;
-    padding: 28px;
+    padding: 30px;
     color: white;
-    margin-top: 30px;
+    margin-top: 32px;
     text-align: center;
-    box-shadow: 0 12px 30px rgba(37,99,235,.14);
+    box-shadow: 0 14px 35px rgba(37,99,235,.16);
 }}
 
 .result-header small {{
@@ -476,24 +523,24 @@ div.stButton > button:hover {{
     color: white;
     font-size: 27px;
     font-weight: 900;
-    margin: 8px 0 0;
+    margin: 9px 0 0;
 }}
 
 .score-card {{
     background: white;
     border: 1px solid #e5edf8;
     border-radius: 22px;
-    padding: 25px 15px;
+    padding: 27px 15px;
     text-align: center;
     box-shadow: 0 12px 30px rgba(31,65,114,.06);
     height: 100%;
 }}
 
 .score-circle {{
-    width: 150px;
-    height: 150px;
+    width: 155px;
+    height: 155px;
     border-radius: 50%;
-    margin: 15px auto;
+    margin: 18px auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -503,8 +550,8 @@ div.stButton > button:hover {{
 .score-circle:before {{
     content: "";
     position: absolute;
-    width: 124px;
-    height: 124px;
+    width: 127px;
+    height: 127px;
     background: white;
     border-radius: 50%;
 }}
@@ -513,14 +560,14 @@ div.stButton > button:hover {{
     position: relative;
     z-index: 1;
     color: #1745a0;
-    font-size: 37px;
+    font-size: 38px;
     font-weight: 900;
 }}
 
 .score-label {{
     color: #74849d;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 800;
 }}
 
 .score-status {{
@@ -528,7 +575,7 @@ div.stButton > button:hover {{
     background: #eff6ff;
     color: #2563eb;
     border-radius: 30px;
-    padding: 7px 17px;
+    padding: 8px 18px;
     font-size: 12px;
     font-weight: 800;
 }}
@@ -536,17 +583,17 @@ div.stButton > button:hover {{
 .result-card {{
     background: white;
     border: 1px solid #e7edf7;
-    border-radius: 18px;
-    padding: 21px;
+    border-radius: 19px;
+    padding: 22px;
     min-height: 160px;
-    margin-bottom: 14px;
-    box-shadow: 0 5px 20px rgba(31,65,114,.04);
+    margin-bottom: 15px;
+    box-shadow: 0 6px 22px rgba(31,65,114,.045);
     transition: all .2s ease;
 }}
 
 .result-card:hover {{
     border-color: #d5e5fb;
-    box-shadow: 0 10px 25px rgba(37,99,235,.07);
+    box-shadow: 0 11px 27px rgba(37,99,235,.08);
 }}
 
 .result-card-title {{
@@ -561,9 +608,9 @@ div.stButton > button:hover {{
     color: #5b6b82;
     font-size: 13px;
     line-height: 1.9;
-    padding: 7px 0;
+    padding: 8px 0;
     border-bottom: 1px solid #f0f3f8;
-    text-align: {'right' if ar else 'left'};
+    text-align: {text_align};
     overflow-wrap: anywhere;
 }}
 
@@ -573,8 +620,8 @@ div.stButton > button:hover {{
 
 .footer {{
     border-top: 1px solid #e8eef7;
-    padding-top: 22px;
-    margin-top: 50px;
+    padding-top: 25px;
+    margin-top: 55px;
     text-align: center;
     color: #8795aa;
     font-size: 12px;
@@ -582,7 +629,7 @@ div.stButton > button:hover {{
 
 .footer strong {{
     color: #2563eb;
-    font-size: 15px;
+    font-size: 17px;
 }}
 
 .analysis-note {{
@@ -590,9 +637,10 @@ div.stButton > button:hover {{
     font-size: 11px;
     text-align: center;
     margin-top: 15px;
+    line-height: 1.8;
 }}
 
-/* Mobile */
+/* MOBILE */
 
 @media (max-width: 700px) {{
     .block-container {{
@@ -614,7 +662,7 @@ div.stButton > button:hover {{
     }}
 
     .brand-name {{
-        font-size: 24px;
+        font-size: 25px;
     }}
 
     .feature-card {{
@@ -625,26 +673,13 @@ div.stButton > button:hover {{
     .result-card {{
         padding: 16px;
     }}
+
+    .result-header {{
+        padding: 23px 15px;
+    }}
 }}
 </style>
 """, unsafe_allow_html=True)
-
-# =========================
-# LANGUAGE SWITCH BUTTON
-# =========================
-
-top_space, lang_col = st.columns([8, 1])
-
-with lang_col:
-    button_label = "EN" if ar else "عربي"
-
-    if st.button(
-        button_label,
-        key="language_toggle",
-        use_container_width=True
-    ):
-        st.session_state.lang = "en" if ar else "ar"
-        st.rerun()
 
 # =========================
 # BRAND HEADER
@@ -960,4 +995,3 @@ st.markdown(f"""
     <div style="margin-top:12px;font-size:10px;">© 2026 CVision AI. All rights reserved.</div>
 </div>
 """, unsafe_allow_html=True)
-
