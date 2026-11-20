@@ -1,6 +1,6 @@
 # CVision AI
 
-AI-powered CV analysis system built with Streamlit and Google Gemini.
+
 
 ## Features
 
