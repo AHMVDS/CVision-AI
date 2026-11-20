@@ -1,7 +1,5 @@
 # CVision AI
 
-
-
 ## Features
 
 - Arabic and English interface
@@ -32,7 +30,7 @@ streamlit run app.py
 Add your Gemini API key to Streamlit Cloud Secrets:
 
 ```toml
-GEMINI_API_KEY = "YOUR_API_KEY"
+GEMINI_API_KEY = "AQ.Ab8RN6Im1xJc4p-QOaoLHDD8u7qzYNJ3X5JoyZD8bHdbLHf9SA"
 ```
 
 Do not upload your API key or `.streamlit/secrets.toml` to GitHub.
