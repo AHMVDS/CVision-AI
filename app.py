@@ -56,11 +56,13 @@ TEXT = {
         "hero_highlight": "لتنافس بثقة.",
         "description": "احصل على تقييم فوري ودقيق لمحتوى سيرتك الذاتية، واكتشف نقاط القوة والمهارات البارزة والفجوات التي تحتاج إلى تحسين قبل التقديم على الوظائف.",
         "upload": "ارفع سيرتك الذاتية لبدء التحليل",
-        "upload_hint": "ندعم ملفات PDF وDOCX حتى حجم 10 ميجابايت مع استخراج سريع للنص وتحليل منظم.",
+        "upload_hint": "أدخل مفتاح Gemini API ثم ارفع ملف PDF أو DOCX (حتى 10 ميجابايت) لبدء التحليل فورًا.",
         "drop": "اسحب ملف السيرة الذاتية هنا أو اضغط لاختيار ملف من جهازك",
         "formats": "الصيغ المدعومة: PDF, DOCX • الحد الأقصى: 10 MB",
-        "api_label": "مفتاح Gemini API (اختياري إذا كان مضبوطًا في البيئة)",
-        "api_hint": "الصق مفتاحك هنا للبدء فورًا دون تعديل أي ملفات إعداد.",
+        "api_label": "مفتاح Gemini API",
+        "api_hint": "الصق مفتاحك هنا (يُستخدم تلقائيًا إذا لم يكن مضبوطًا في متغيرات البيئة أو Secrets).",
+        "api_missing_alert": "يرجى إدخال مفتاح Gemini API في الخانة المخصصة أولًا قبل بدء التحليل.",
+        "api_connected": "تم إدخال مفتاح API وجاهز للاستخدام",
         "analyze": "ابدأ التحليل الذكي الآن",
         "loading": "جاري تحليل السيرة الذاتية وتقييم جاهزيتها...",
         "retranslating": "جاري تحديث نتائج التحليل إلى اللغة العربية...",
@@ -73,7 +75,7 @@ TEXT = {
         "new": "تحليل سيرة ذاتية أخرى",
         "error_size": "حجم الملف يتجاوز الحد المسموح (10 ميجابايت). يرجى اختيار ملف أصغر.",
         "error_text": "تعذر استخراج نص واضح من الملف. تأكد أن الملف يحتوي على نص قابل للقراءة وليس صورًا ممسوحة فقط.",
-        "error_api": "تعذر إتمام التحليل حاليًا. تحقق من مفتاح Gemini API أو حالة الاتصال وحاول مجددًا.",
+        "error_api": "تعذر إتمام التحليل حاليًا. تحقق من صحة مفتاح Gemini API أو حالة الاتصال وحاول مجددًا.",
         "footer": "خطوة أذكى وأكثر احترافية نحو فرصتك المهنية القادمة.",
         "f1": "1. رفع الملف بسهولة",
         "f1d": "ارفع ملف PDF أو DOCX خلال ثوانٍ دون خطوات معقدة.",
@@ -104,11 +106,13 @@ TEXT = {
         "hero_highlight": "stand out.",
         "description": "Get an instant, structured evaluation of your CV to uncover core strengths, highlight key skills, and fix missing details before applying.",
         "upload": "Upload Your Resume for Analysis",
-        "upload_hint": "Supports PDF and DOCX files up to 10 MB with fast text extraction and structured insights.",
+        "upload_hint": "Enter your Gemini API key, then upload a PDF or DOCX file (up to 10 MB) to start immediately.",
         "drop": "Drag and drop your CV here or click to browse files",
         "formats": "Supported formats: PDF, DOCX • Max size: 10 MB",
-        "api_label": "Gemini API Key (optional if already set in environment)",
-        "api_hint": "Paste your key here to start right away with zero config files.",
+        "api_label": "Gemini API Key",
+        "api_hint": "Paste your key here (used automatically if not set in environment variables or Secrets).",
+        "api_missing_alert": "Please enter your Gemini API key in the field above before starting the analysis.",
+        "api_connected": "API key entered and ready",
         "analyze": "Run Smart CV Analysis",
         "loading": "Analyzing your resume and evaluating readiness...",
         "retranslating": "Updating analysis results into English...",
@@ -183,12 +187,12 @@ def extract_text(file_bytes: bytes, filename: str) -> str:
     raise ValueError("Unsupported file format")
 
 
-def analyze_cv(cv_text: str, target_lang_code: str) -> dict:
-    api_key = get_gemini_api_key()
-    if not api_key:
-        raise ValueError("GEMINI_API_KEY is missing. Enter it in the API key field or environment.")
+def analyze_cv(cv_text: str, target_lang_code: str, api_key: str) -> dict:
+    clean_key = (api_key or "").strip()
+    if not clean_key:
+        raise ValueError("GEMINI_API_KEY is missing. Enter it in the API key field above.")
 
-    client = genai.Client(api_key=api_key)
+    client = genai.Client(api_key=clean_key)
     target_language = "Arabic" if target_lang_code == "ar" else "English"
 
     prompt = f"""
@@ -244,15 +248,17 @@ direction = "rtl" if ar else "ltr"
 text_align = "right" if ar else "left"
 opposite_align = "left" if ar else "right"
 
+active_api_key = get_gemini_api_key()
+
 if (
     st.session_state.result is not None
     and st.session_state.result_lang != lang
     and st.session_state.cv_text.strip()
-    and get_gemini_api_key()
+    and active_api_key
 ):
     try:
         with st.spinner(t["retranslating"]):
-            st.session_state.result = analyze_cv(st.session_state.cv_text, lang)
+            st.session_state.result = analyze_cv(st.session_state.cv_text, lang, active_api_key)
             st.session_state.result_lang = lang
     except Exception:
         pass
@@ -599,6 +605,21 @@ st.markdown(
         margin-bottom: 18px;
         text-align: {text_align};
         line-height: 1.75;
+    }}
+
+    [data-testid="stTextInput"] input {{
+        border-radius: 14px !important;
+        border: 1.5px solid var(--blue-200) !important;
+        background: #f8fbff !important;
+        padding: 10px 14px !important;
+        color: var(--blue-900) !important;
+        font-weight: 600 !important;
+    }}
+
+    [data-testid="stTextInput"] input:focus {{
+        border-color: var(--blue-600) !important;
+        background: #ffffff !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
     }}
 
     [data-testid="stFileUploader"] {{
@@ -959,14 +980,17 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-if not (os.getenv("GEMINI_API_KEY") or "").strip():
-    st.text_input(
-        t["api_label"],
-        type="password",
-        key="manual_gemini_key",
-        placeholder="AIzaSy...",
-        help=t["api_hint"],
-    )
+st.text_input(
+    t["api_label"],
+    type="password",
+    key="manual_gemini_key",
+    placeholder="AIzaSy...",
+    help=t["api_hint"],
+)
+
+current_key = get_gemini_api_key()
+if current_key:
+    st.caption(f"✓ {t['api_connected']}")
 
 uploaded_file = st.file_uploader(
     t["drop"],
@@ -1001,6 +1025,11 @@ if uploaded_file is not None:
 
     st.markdown('<div class="action-btn-wrap">', unsafe_allow_html=True)
     if st.button(t["analyze"], key="run_analysis_btn", use_container_width=True):
+        key_to_use = get_gemini_api_key()
+        if not key_to_use:
+            st.warning(t["api_missing_alert"])
+            st.stop()
+
         try:
             with st.spinner(t["loading"]):
                 extracted = extract_text(uploaded_file.getvalue(), uploaded_file.name)
@@ -1008,7 +1037,7 @@ if uploaded_file is not None:
                     st.error(t["error_text"])
                     st.stop()
 
-                analysis_data = analyze_cv(extracted, lang)
+                analysis_data = analyze_cv(extracted, lang, key_to_use)
                 st.session_state.cv_text = extracted
                 st.session_state.file_name = uploaded_file.name
                 st.session_state.result = analysis_data
