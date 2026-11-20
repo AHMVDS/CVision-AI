@@ -72,7 +72,8 @@ TEXT = {
         "new": "تحليل سيرة ذاتية أخرى",
         "error_size": "حجم الملف يتجاوز الحد المسموح (10 ميجابايت). يرجى اختيار ملف أصغر.",
         "error_text": "تعذر استخراج نص واضح من الملف. تأكد أن الملف يحتوي على نص قابل للقراءة وليس صورًا ممسوحة فقط.",
-        "error_api": "تعذر إتمام التحليل حاليًا. يرجى المحاولة مرة أخرى بعد قليل.",
+        "error_key": "مفتاح الخدمة غير مضبوط في الإعدادات. يرجى إضافته في Secrets ثم إعادة تشغيل التطبيق.",
+        "error_api": "تعذر إتمام التحليل حاليًا. يرجى التأكد من صلاحية المفتاح والاتصال ثم المحاولة مرة أخرى.",
         "footer": "خطوة أذكى وأكثر احترافية نحو فرصتك المهنية القادمة.",
         "f1": "1. رفع الملف بسهولة",
         "f1d": "ارفع ملف PDF أو DOCX خلال ثوانٍ دون خطوات معقدة.",
@@ -118,7 +119,8 @@ TEXT = {
         "new": "Analyze Another Resume",
         "error_size": "File size exceeds the 10 MB limit. Please upload a smaller file.",
         "error_text": "Could not extract readable text from this file. Make sure it contains selectable text rather than scanned images only.",
-        "error_api": "Unable to complete the analysis right now. Please try again shortly.",
+        "error_key": "Service key is not configured. Please add it to Secrets and reboot the app.",
+        "error_api": "Unable to complete the analysis right now. Please verify your key and connection and try again.",
         "footer": "A smarter, sharper step toward your next career milestone.",
         "f1": "1. Effortless Upload",
         "f1d": "Upload your PDF or DOCX resume in seconds with zero friction.",
@@ -148,7 +150,7 @@ TEXT = {
 # =========================
 
 KEY_CANDIDATES = ("CVISION_AI_KEY", "AI_SERVICE_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY")
-MODEL_NAME = "gemini-3.8-flash"
+MODEL_CANDIDATES = ("gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash")
 
 
 def _parse_secrets_toml_fallback() -> str:
@@ -218,7 +220,7 @@ def extract_text(file_bytes: bytes, filename: str) -> str:
 def analyze_cv(cv_text: str, target_lang_code: str) -> dict:
     service_key = get_service_key()
     if not service_key:
-        raise RuntimeError("Service key not configured")
+        raise KeyError("MISSING_SERVICE_KEY")
 
     client = genai.Client(api_key=service_key)
     target_language = "Arabic" if target_lang_code == "ar" else "English"
@@ -249,19 +251,28 @@ CV CONTENT:
 {cv_text[:18000]}
 """
 
-    response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            temperature=0.25,
-        ),
-    )
+    last_error = None
+    for model_name in MODEL_CANDIDATES:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    temperature=0.25,
+                ),
+            )
+            raw = (response.text or "").strip()
+            raw = re.sub(r"^```(?:json)?\s*", "", raw)
+            raw = re.sub(r"\s*```$", "", raw)
+            parsed = json.loads(raw)
+            if isinstance(parsed, dict):
+                return parsed
+        except Exception as exc:
+            last_error = exc
+            continue
 
-    raw = (response.text or "").strip()
-    raw = re.sub(r"^```(?:json)?\s*", "", raw)
-    raw = re.sub(r"\s*```$", "", raw)
-    return json.loads(raw)
+    raise RuntimeError(str(last_error) if last_error else "ANALYSIS_FAILED")
 
 
 # =========================
@@ -1038,6 +1049,8 @@ if uploaded_file is not None:
                 st.session_state.result_lang = lang
 
             st.rerun()
+        except KeyError:
+            st.error(t["error_key"])
         except Exception:
             st.error(t["error_api"])
     st.markdown("</div>", unsafe_allow_html=True)
@@ -1144,42 +1157,4 @@ if st.session_state.result is not None:
                 <div class="insight-card" style="margin-bottom:16px;">
                     <div class="insight-head">
                         <div class="insight-title"><span>{icon}</span><span>{html.escape(t[label_key])}</span></div>
-                        <span class="insight-pill">{html.escape(count_text)}</span>
-                    </div>
-                    {rows_html}
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-    st.markdown(
-        f'<div class="disclaimer-text">{html.escape(t["analysis_note"])}</div>',
-        unsafe_allow_html=True,
-    )
-
-    st.markdown('<div style="height:14px;"></div>', unsafe_allow_html=True)
-
-    st.markdown('<div class="action-btn-wrap">', unsafe_allow_html=True)
-    if st.button(t["new"], key="reset_analysis_btn", use_container_width=True):
-        st.session_state.result = None
-        st.session_state.result_lang = None
-        st.session_state.cv_text = ""
-        st.session_state.file_name = ""
-        st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-# =========================
-# FOOTER
-# =========================
-
-st.markdown(
-    f"""
-    <div class="saas-footer">
-        <strong>CVision AI</strong>
-        <div style="margin-top:6px;">{html.escape(t["footer"])}</div>
-        <div style="margin-top:10px;font-size:11px;color:#94a3b8;">© 2026 CVision AI. All rights reserved.</div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+                        <span class="insight-pill">{html.escape(
