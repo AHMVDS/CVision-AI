@@ -140,11 +140,12 @@ st.markdown(f"""
 
 .stApp {{
     background:
-        radial-gradient(ellipse at 10% 5%, rgba(59,130,246,.10), transparent 30%),
-        radial-gradient(ellipse at 90% 25%, rgba(96,165,250,.10), transparent 28%),
+        radial-gradient(ellipse at 10% 5%, rgba(59,130,246,.12), transparent 30%),
+        radial-gradient(ellipse at 90% 25%, rgba(96,165,250,.12), transparent 28%),
         #f7f9fd;
     color: var(--text);
     font-family: '{font}', sans-serif;
+    direction: {'rtl' if ar else 'ltr'};
 }}
 
 html, body, [class*="css"] {{
@@ -173,20 +174,30 @@ h1, h2, h3 {{
     visibility: hidden;
 }}
 
-[data-testid="stSelectbox"] {{
-    width: 115px !important;
-    min-width: 115px !important;
-    margin-left: auto;
-    margin-right: 0;
+/* Language button */
+
+div[data-testid="stHorizontalBlock"]:first-of-type
+div[data-testid="stButton"] button {{
+    min-height: 36px;
+    border-radius: 11px;
+    background: white;
+    color: #2563eb;
+    border: 1px solid #dbeafe;
+    font-size: 12px;
+    font-weight: 900;
+    padding: 0 12px;
+    box-shadow: 0 3px 12px rgba(37,99,235,.07);
 }}
 
-[data-testid="stSelectbox"] > div > div {{
-    min-height: 36px !important;
-    border-radius: 10px !important;
-    font-size: 12px !important;
-    border: 1px solid #dbeafe !important;
-    background: white !important;
+div[data-testid="stHorizontalBlock"]:first-of-type
+div[data-testid="stButton"] button:hover {{
+    background: #eff6ff;
+    color: #1745b8;
+    border-color: #93c5fd;
+    transform: translateY(-1px);
 }}
+
+/* Brand */
 
 .brand {{
     display: flex;
@@ -197,20 +208,20 @@ h1, h2, h3 {{
 }}
 
 .brand-icon {{
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg,#2563eb,#60a5fa);
     color: white;
-    border-radius: 14px;
-    font-size: 21px;
-    box-shadow: 0 8px 20px rgba(37,99,235,.25);
+    border-radius: 15px;
+    font-size: 22px;
+    box-shadow: 0 8px 22px rgba(37,99,235,.27);
 }}
 
 .brand-name {{
-    font-size: 27px;
+    font-size: 28px;
     font-weight: 900;
     letter-spacing: -1px;
     color: #173b79;
@@ -225,39 +236,41 @@ h1, h2, h3 {{
     font-size: 11px;
     letter-spacing: 1.2px;
     text-align: center;
-    margin-top: 2px;
+    margin-top: 3px;
 }}
+
+/* Hero */
 
 .hero {{
     position: relative;
     overflow: hidden;
     background: linear-gradient(120deg,#102d61 0%,#174b9d 55%,#347ce5 100%);
     border-radius: 30px;
-    padding: 65px 35px;
+    padding: 70px 35px;
     margin: 30px 0 28px;
     text-align: center;
-    box-shadow: 0 22px 55px rgba(23,69,184,.18);
+    box-shadow: 0 22px 55px rgba(23,69,184,.20);
 }}
 
 .hero:before {{
     content: "";
     position: absolute;
-    width: 300px;
-    height: 300px;
+    width: 330px;
+    height: 330px;
     border-radius: 50%;
-    border: 1px solid rgba(255,255,255,.13);
-    top: -160px;
+    border: 1px solid rgba(255,255,255,.15);
+    top: -170px;
     left: -60px;
 }}
 
 .hero:after {{
     content: "";
     position: absolute;
-    width: 210px;
-    height: 210px;
+    width: 230px;
+    height: 230px;
     border-radius: 50%;
-    background: rgba(255,255,255,.055);
-    bottom: -120px;
+    background: rgba(255,255,255,.07);
+    bottom: -130px;
     right: 5%;
 }}
 
@@ -272,15 +285,16 @@ h1, h2, h3 {{
     background: rgba(255,255,255,.12);
     border: 1px solid rgba(255,255,255,.20);
     border-radius: 50px;
-    padding: 8px 17px;
+    padding: 9px 18px;
     font-size: 12px;
     font-weight: 700;
     margin-bottom: 20px;
+    backdrop-filter: blur(8px);
 }}
 
 .hero h1 {{
     color: white;
-    font-size: clamp(32px,5vw,53px);
+    font-size: clamp(32px,5vw,55px);
     line-height: 1.35;
     font-weight: 900;
     margin: 0 0 14px;
@@ -322,13 +336,15 @@ h1, h2, h3 {{
     margin: 5px 0 22px;
 }}
 
+/* Feature cards */
+
 .feature-card {{
-    background: rgba(255,255,255,.88);
+    background: rgba(255,255,255,.92);
     border: 1px solid #e7edf7;
-    border-radius: 19px;
-    padding: 22px 17px;
+    border-radius: 20px;
+    padding: 23px 17px;
     min-height: 145px;
-    box-shadow: 0 7px 22px rgba(31,65,114,.035);
+    box-shadow: 0 7px 22px rgba(31,65,114,.045);
     transition: all .25s ease;
     text-align: center;
 }}
@@ -336,17 +352,17 @@ h1, h2, h3 {{
 .feature-card:hover {{
     transform: translateY(-5px);
     border-color: #bfdbfe;
-    box-shadow: 0 15px 30px rgba(37,99,235,.09);
+    box-shadow: 0 15px 30px rgba(37,99,235,.10);
 }}
 
 .feature-icon {{
-    width: 42px;
-    height: 42px;
-    border-radius: 13px;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #eff6ff;
+    background: linear-gradient(135deg,#eff6ff,#dbeafe);
     font-size: 20px;
     margin: 0 auto 13px;
 }}
@@ -364,13 +380,15 @@ h1, h2, h3 {{
     line-height: 1.8;
 }}
 
+/* Upload */
+
 .upload-panel {{
-    background: rgba(255,255,255,.95);
+    background: rgba(255,255,255,.96);
     border: 1px solid #e3ebf7;
     border-radius: 25px;
     padding: 30px;
     margin-top: 35px;
-    box-shadow: 0 15px 40px rgba(31,65,114,.06);
+    box-shadow: 0 15px 40px rgba(31,65,114,.07);
 }}
 
 .panel-heading {{
@@ -409,6 +427,8 @@ h1, h2, h3 {{
     border-radius: 10px;
 }}
 
+/* Buttons */
+
 div.stButton > button {{
     background: linear-gradient(110deg,#2563eb,#3478e5);
     color: white;
@@ -434,6 +454,8 @@ div.stButton > button:hover {{
     border-radius: 20px;
 }}
 
+/* Results */
+
 .result-header {{
     background: linear-gradient(120deg,#102d61,#2563eb);
     border-radius: 23px;
@@ -441,6 +463,7 @@ div.stButton > button:hover {{
     color: white;
     margin-top: 30px;
     text-align: center;
+    box-shadow: 0 12px 30px rgba(37,99,235,.14);
 }}
 
 .result-header small {{
@@ -517,7 +540,13 @@ div.stButton > button:hover {{
     padding: 21px;
     min-height: 160px;
     margin-bottom: 14px;
-    box-shadow: 0 5px 20px rgba(31,65,114,.035);
+    box-shadow: 0 5px 20px rgba(31,65,114,.04);
+    transition: all .2s ease;
+}}
+
+.result-card:hover {{
+    border-color: #d5e5fb;
+    box-shadow: 0 10px 25px rgba(37,99,235,.07);
 }}
 
 .result-card-title {{
@@ -563,47 +592,58 @@ div.stButton > button:hover {{
     margin-top: 15px;
 }}
 
+/* Mobile */
+
 @media (max-width: 700px) {{
     .block-container {{
         padding-left: 1rem;
         padding-right: 1rem;
     }}
+
     .hero {{
         padding: 45px 18px;
         border-radius: 22px;
     }}
+
     .hero h1 {{
         font-size: 34px;
     }}
+
     .upload-panel {{
         padding: 19px;
     }}
+
     .brand-name {{
         font-size: 24px;
+    }}
+
+    .feature-card {{
+        padding: 17px 10px;
+        min-height: 155px;
+    }}
+
+    .result-card {{
+        padding: 16px;
     }}
 }}
 </style>
 """, unsafe_allow_html=True)
 
 # =========================
-# LANGUAGE SWITCH
+# LANGUAGE SWITCH BUTTON
 # =========================
 
 top_space, lang_col = st.columns([8, 1])
 
 with lang_col:
-    language = st.selectbox(
-        "Language",
-        ["العربية", "English"],
-        index=0 if ar else 1,
-        key="language_selector",
-        label_visibility="collapsed"
-    )
+    button_label = "EN" if ar else "عربي"
 
-    selected = "ar" if language == "العربية" else "en"
-
-    if selected != st.session_state.lang:
-        st.session_state.lang = selected
+    if st.button(
+        button_label,
+        key="language_toggle",
+        use_container_width=True
+    ):
+        st.session_state.lang = "en" if ar else "ar"
         st.rerun()
 
 # =========================
@@ -920,3 +960,4 @@ st.markdown(f"""
     <div style="margin-top:12px;font-size:10px;">© 2026 CVision AI. All rights reserved.</div>
 </div>
 """, unsafe_allow_html=True)
+
