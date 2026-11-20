@@ -4,12 +4,14 @@ import os
 import re
 from io import BytesIO
 from pathlib import Path
+from typing import List
 
 import streamlit as st
 import streamlit.components.v1 as components
 from docx import Document
 from google import genai
 from google.genai import types
+from pydantic import BaseModel, Field
 from pypdf import PdfReader
 
 st.set_page_config(
@@ -153,6 +155,37 @@ KEY_CANDIDATES = ("CVISION_AI_KEY", "AI_SERVICE_KEY", "GEMINI_API_KEY", "GOOGLE_
 MODEL_CANDIDATES = ("gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash")
 
 
+class CVEvaluationSchema(BaseModel):
+    """Structured schema for CV evaluation output from Gemini."""
+
+    compatibilityScore: int = Field(
+        ...,
+        ge=0,
+        le=100,
+        description="Overall CV quality, structure, clarity, and readiness score from 0 to 100.",
+    )
+    summary: str = Field(
+        default="",
+        description="Concise 2-3 sentence overall evaluation summary.",
+    )
+    matchingSkills: List[str] = Field(
+        default_factory=list,
+        description="Core skills and competencies identified in the CV.",
+    )
+    missingSkills: List[str] = Field(
+        default_factory=list,
+        description="Important skills, metrics, credentials, or sections missing or needing reinforcement.",
+    )
+    strengths: List[str] = Field(
+        default_factory=list,
+        description="Key candidate strengths evidenced in the CV.",
+    )
+    suggestions: List[str] = Field(
+        default_factory=list,
+        description="Actionable recommendations to improve the CV.",
+    )
+
+
 def _parse_secrets_toml_fallback() -> str:
     candidate_paths = [
         Path.cwd() / ".streamlit" / "secrets.toml",
@@ -259,15 +292,17 @@ CV CONTENT:
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
+                    response_schema=CVEvaluationSchema,
                     temperature=0.25,
                 ),
             )
             raw = (response.text or "").strip()
-            raw = re.sub(r"^```(?:json)?\s*", "", raw)
-            raw = re.sub(r"\s*```$", "", raw)
+            raw = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.IGNORECASE)
+            raw = re.sub(r"\s*```$", "", raw, flags=re.IGNORECASE)
             parsed = json.loads(raw)
             if isinstance(parsed, dict):
-                return parsed
+                validated = CVEvaluationSchema(**parsed)
+                return validated.model_dump()
         except Exception as exc:
             last_error = exc
             continue
@@ -1059,119 +1094,153 @@ st.markdown("</div>", unsafe_allow_html=True)
 
 
 # =========================
-# ANALYSIS RESULTS VIEW
+# RESULTS SECTION & FOOTER
 # =========================
 
+def _render_insight_card(icon: str, title: str, items: list, empty_label: str, items_label: str) -> str:
+    clean_items = [str(item).strip() for item in (items or []) if str(item).strip()]
+    if not clean_items:
+        rows_html = f'<div class="insight-row">{html.escape(empty_label)}</div>'
+    else:
+        rows_html = "".join(
+            f'<div class="insight-row">• {html.escape(entry)}</div>' for entry in clean_items
+        )
+
+    return (
+        f'<div class="insight-card">'
+        f'  <div class="insight-head">'
+        f'    <div class="insight-title"><span>{icon}</span><span>{html.escape(title)}</span></div>'
+        f'    <span class="insight-pill">{len(clean_items)} {html.escape(items_label)}</span>'
+        f'  </div>'
+        f'  <div>{rows_html}</div>'
+        f'</div>'
+    )
+
+
 if st.session_state.result is not None:
-    result = st.session_state.result
-    raw_score = result.get("compatibilityScore", 0)
+    res = st.session_state.result
+    raw_score = res.get("compatibilityScore", 0)
     try:
-        score = max(0, min(100, int(raw_score)))
+        score = max(0, min(100, int(round(float(raw_score)))))
     except (TypeError, ValueError):
         score = 0
 
-    if score >= 85:
-        status_label = t["excellent"]
-        ring_color = "#16a34a"
-    elif score >= 70:
-        status_label = t["good"]
+    if score >= 80:
+        verdict = t["excellent"]
+        ring_color = "#1d4ed8"
+    elif score >= 60:
+        verdict = t["good"]
         ring_color = "#2563eb"
-    elif score >= 50:
-        status_label = t["average"]
-        ring_color = "#d97706"
+    elif score >= 40:
+        verdict = t["average"]
+        ring_color = "#3b82f6"
     else:
-        status_label = t["weak"]
-        ring_color = "#dc2626"
+        verdict = t["weak"]
+        ring_color = "#64748b"
+
+    deg = int((score / 100) * 360)
+    file_caption = (
+        f" — {st.session_state.file_name}" if st.session_state.file_name else ""
+    )
 
     st.markdown(
         f"""
         <div class="report-banner">
-            <small>{html.escape(t["result_label"])}</small>
-            <h2>📊 {html.escape(t["result_title"])}</h2>
+            <small>{html.escape(t["result_label"])}{html.escape(file_caption)}</small>
+            <h2>{html.escape(t["result_title"])}</h2>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    top_res_left, top_res_right = st.columns([1, 1.65])
+    left_res, right_res = st.columns([4, 8])
 
-    with top_res_left:
+    with left_res:
         st.markdown(
             f"""
             <div class="score-panel">
                 <div class="score-title">{html.escape(t["score"])}</div>
-                <div class="score-ring" style="background: conic-gradient({ring_color} {score}%, #e2ebf7 0);">
+                <div class="score-ring" style="background: conic-gradient({ring_color} {deg}deg, #e2ebf7 {deg}deg 360deg);">
                     <div class="score-num">{score}%</div>
                 </div>
-                <div class="score-badge">{html.escape(status_label)}</div>
+                <div class="score-badge">{html.escape(verdict)}</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-    with top_res_right:
-        safe_summary = html.escape(str(result.get("summary", "") or t["empty"]))
+    with right_res:
+        summary_text = str(res.get("summary") or "").strip() or t["empty"]
         st.markdown(
             f"""
             <div class="insight-card">
                 <div class="insight-head">
                     <div class="insight-title"><span>✦</span><span>{html.escape(t["summary"])}</span></div>
                 </div>
-                <div style="color:#334155;font-size:14.5px;line-height:1.95;text-align:{text_align};">
-                    {safe_summary}
-                </div>
+                <div class="insight-row">{html.escape(summary_text)}</div>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-    st.markdown('<div style="height:16px;"></div>', unsafe_allow_html=True)
+    st.markdown("<div style='height:18px;'></div>", unsafe_allow_html=True)
 
-    detail_sections = [
-        ("💡", "skills", "matchingSkills"),
-        ("⚠️", "missing", "missingSkills"),
-        ("⭐", "strengths", "strengths"),
-        ("🚀", "suggestions", "suggestions"),
-    ]
+    grid_top_1, grid_top_2 = st.columns(2)
+    with grid_top_1:
+        st.markdown(
+            _render_insight_card(
+                "✓",
+                t["skills"],
+                res.get("matchingSkills", []),
+                t["empty"],
+                t["items_count"],
+            ),
+            unsafe_allow_html=True,
+        )
+    with grid_top_2:
+        st.markdown(
+            _render_insight_card(
+                "△",
+                t["missing"],
+                res.get("missingSkills", []),
+                t["empty"],
+                t["items_count"],
+            ),
+            unsafe_allow_html=True,
+        )
 
-    grid_cols = st.columns(2)
-    for idx, (icon, label_key, data_key) in enumerate(detail_sections):
-        items = result.get(data_key, [])
-        if not isinstance(items, list):
-            items = []
+    st.markdown("<div style='height:18px;'></div>", unsafe_allow_html=True)
 
-        cleaned_items = [str(x).strip() for x in items if str(x).strip()]
-        count_text = f"{len(cleaned_items)} {t['items_count']}"
-
-        if cleaned_items:
-            rows_html = "".join(
-                f'<div class="insight-row">• {html.escape(item)}</div>'
-                for item in cleaned_items
-            )
-        else:
-            rows_html = f'<div class="insight-row">{html.escape(t["empty"])}</div>'
-
-        with grid_cols[idx % 2]:
-            st.markdown(
-                f"""
-                <div class="insight-card" style="margin-bottom:16px;">
-                    <div class="insight-head">
-                        <div class="insight-title"><span>{icon}</span><span>{html.escape(t[label_key])}</span></div>
-                        <span class="insight-pill">{html.escape(count_text)}</span>
-                    </div>
-                    {rows_html}
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+    grid_bot_1, grid_bot_2 = st.columns(2)
+    with grid_bot_1:
+        st.markdown(
+            _render_insight_card(
+                "★",
+                t["strengths"],
+                res.get("strengths", []),
+                t["empty"],
+                t["items_count"],
+            ),
+            unsafe_allow_html=True,
+        )
+    with grid_bot_2:
+        st.markdown(
+            _render_insight_card(
+                "↗",
+                t["suggestions"],
+                res.get("suggestions", []),
+                t["empty"],
+                t["items_count"],
+            ),
+            unsafe_allow_html=True,
+        )
 
     st.markdown(
         f'<div class="disclaimer-text">{html.escape(t["analysis_note"])}</div>',
         unsafe_allow_html=True,
     )
 
-    st.markdown('<div style="height:14px;"></div>', unsafe_allow_html=True)
-
+    st.markdown("<div style='height:18px;'></div>", unsafe_allow_html=True)
     st.markdown('<div class="action-btn-wrap">', unsafe_allow_html=True)
     if st.button(t["new"], key="reset_analysis_btn", use_container_width=True):
         st.session_state.result = None
@@ -1181,17 +1250,11 @@ if st.session_state.result is not None:
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
-
-# =========================
-# FOOTER
-# =========================
-
 st.markdown(
     f"""
     <div class="saas-footer">
         <strong>CVision AI</strong>
         <div style="margin-top:6px;">{html.escape(t["footer"])}</div>
-        <div style="margin-top:10px;font-size:11px;color:#94a3b8;">© 2026 CVision AI. All rights reserved.</div>
     </div>
     """,
     unsafe_allow_html=True,
