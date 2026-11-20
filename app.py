@@ -59,6 +59,8 @@ TEXT = {
         "upload_hint": "ندعم ملفات PDF وDOCX حتى حجم 10 ميجابايت مع استخراج سريع للنص وتحليل منظم.",
         "drop": "اسحب ملف السيرة الذاتية هنا أو اضغط لاختيار ملف من جهازك",
         "formats": "الصيغ المدعومة: PDF, DOCX • الحد الأقصى: 10 MB",
+        "api_label": "مفتاح Gemini API (اختياري إذا كان مضبوطًا في البيئة)",
+        "api_hint": "الصق مفتاحك هنا للبدء فورًا دون تعديل أي ملفات إعداد.",
         "analyze": "ابدأ التحليل الذكي الآن",
         "loading": "جاري تحليل السيرة الذاتية وتقييم جاهزيتها...",
         "retranslating": "جاري تحديث نتائج التحليل إلى اللغة العربية...",
@@ -71,7 +73,7 @@ TEXT = {
         "new": "تحليل سيرة ذاتية أخرى",
         "error_size": "حجم الملف يتجاوز الحد المسموح (10 ميجابايت). يرجى اختيار ملف أصغر.",
         "error_text": "تعذر استخراج نص واضح من الملف. تأكد أن الملف يحتوي على نص قابل للقراءة وليس صورًا ممسوحة فقط.",
-        "error_api": "تعذر إتمام التحليل حاليًا. تحقق من إعداد مفتاح GEMINI_API_KEY وحاول مجددًا.",
+        "error_api": "تعذر إتمام التحليل حاليًا. تحقق من مفتاح Gemini API أو حالة الاتصال وحاول مجددًا.",
         "footer": "خطوة أذكى وأكثر احترافية نحو فرصتك المهنية القادمة.",
         "f1": "1. رفع الملف بسهولة",
         "f1d": "ارفع ملف PDF أو DOCX خلال ثوانٍ دون خطوات معقدة.",
@@ -105,6 +107,8 @@ TEXT = {
         "upload_hint": "Supports PDF and DOCX files up to 10 MB with fast text extraction and structured insights.",
         "drop": "Drag and drop your CV here or click to browse files",
         "formats": "Supported formats: PDF, DOCX • Max size: 10 MB",
+        "api_label": "Gemini API Key (optional if already set in environment)",
+        "api_hint": "Paste your key here to start right away with zero config files.",
         "analyze": "Run Smart CV Analysis",
         "loading": "Analyzing your resume and evaluating readiness...",
         "retranslating": "Updating analysis results into English...",
@@ -117,7 +121,7 @@ TEXT = {
         "new": "Analyze Another Resume",
         "error_size": "File size exceeds the 10 MB limit. Please upload a smaller file.",
         "error_text": "Could not extract readable text from this file. Make sure it contains selectable text rather than scanned images only.",
-        "error_api": "Unable to complete analysis right now. Please check your GEMINI_API_KEY configuration and try again.",
+        "error_api": "Unable to complete analysis right now. Please check your Gemini API key or connection and try again.",
         "footer": "A smarter, sharper step toward your next career milestone.",
         "f1": "1. Effortless Upload",
         "f1d": "Upload your PDF or DOCX resume in seconds with zero friction.",
@@ -143,8 +147,22 @@ TEXT = {
 
 
 # =========================
-# FILE EXTRACTION & AI ANALYSIS
+# API KEY, EXTRACTION & AI ANALYSIS
 # =========================
+
+def get_gemini_api_key() -> str:
+    typed_key = str(st.session_state.get("manual_gemini_key", "")).strip()
+    if typed_key:
+        return typed_key
+
+    try:
+        if "GEMINI_API_KEY" in st.secrets and st.secrets["GEMINI_API_KEY"]:
+            return str(st.secrets["GEMINI_API_KEY"]).strip()
+    except Exception:
+        pass
+
+    return (os.getenv("GEMINI_API_KEY") or "").strip()
+
 
 def extract_text(file_bytes: bytes, filename: str) -> str:
     lower_name = filename.lower()
@@ -166,9 +184,9 @@ def extract_text(file_bytes: bytes, filename: str) -> str:
 
 
 def analyze_cv(cv_text: str, target_lang_code: str) -> dict:
-    api_key = st.secrets.get("GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY")
+    api_key = get_gemini_api_key()
     if not api_key:
-        raise ValueError("Missing GEMINI_API_KEY")
+        raise ValueError("GEMINI_API_KEY is missing. Enter it in the API key field or environment.")
 
     client = genai.Client(api_key=api_key)
     target_language = "Arabic" if target_lang_code == "ar" else "English"
@@ -230,6 +248,7 @@ if (
     st.session_state.result is not None
     and st.session_state.result_lang != lang
     and st.session_state.cv_text.strip()
+    and get_gemini_api_key()
 ):
     try:
         with st.spinner(t["retranslating"]):
@@ -264,7 +283,7 @@ components.html(
 
 
 # =========================
-# STYLES (WITH REFINED LANGUAGE BUTTON)
+# PREMIUM BLUE & WHITE SAAS THEME
 # =========================
 
 st.markdown(
@@ -561,7 +580,7 @@ st.markdown(
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: 26px;
-        padding: 28px 28px 16px;
+        padding: 28px 28px 18px;
         margin-top: 32px;
         box-shadow: var(--shadow-md);
     }}
@@ -832,7 +851,7 @@ st.markdown(
             border-radius: 22px;
         }}
         .upload-shell {{
-            padding: 20px 16px 12px;
+            padding: 20px 16px 14px;
             border-radius: 20px;
         }}
         .report-banner {{
@@ -940,6 +959,15 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+if not (os.getenv("GEMINI_API_KEY") or "").strip():
+    st.text_input(
+        t["api_label"],
+        type="password",
+        key="manual_gemini_key",
+        placeholder="AIzaSy...",
+        help=t["api_hint"],
+    )
+
 uploaded_file = st.file_uploader(
     t["drop"],
     type=["pdf", "docx"],
@@ -987,8 +1015,8 @@ if uploaded_file is not None:
                 st.session_state.result_lang = lang
 
             st.rerun()
-        except Exception:
-            st.error(t["error_api"])
+        except Exception as exc:
+            st.error(f"{t['error_api']}\n\n`{exc}`")
     st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("</div>", unsafe_allow_html=True)
